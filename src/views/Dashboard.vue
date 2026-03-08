@@ -100,7 +100,7 @@ const headers = {
   "Content-Type":"application/json"
 }
 
-const API = "http://localhost:8083/api/teachers"
+const API = "http://25.43.108.74:8083/api/teachers"
 
 
 // NAVIGASI TAMBAH GURU
