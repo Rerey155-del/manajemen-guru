@@ -71,8 +71,6 @@
 
 import { ref } from "vue"
 import { useRouter } from "vue-router"
-import axios from "axios"
-
 
 const router = useRouter()
 
@@ -89,27 +87,36 @@ const handleLogin = async () => {
   try {
     isLoading.value = true
     
-    // Memanggil API Backend melalui proxy /api
-    const response = await axios.post("/api/auth/login", {
-      username: username.value,
-      password: password.value
+    // Memanggil API Backend menggunakan native fetch dengan URL lengkap
+    const response = await fetch("http://localhost:8083/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: username.value,
+        password: password.value
+      })
     })
 
-    if (response.status === 200) {
+    if (response.ok) {
+      const data = await response.json()
       alert("Login Berhasil!")
       
       // Simpan data login (token/username) ke localStorage
-      localStorage.setItem("user", JSON.stringify(response.data))
+      localStorage.setItem("user", JSON.stringify(data))
       
       router.push("/dashboard")
+    } else {
+      if (response.status === 401) {
+        alert("Username atau Password salah!")
+      } else {
+        alert("Terjadi kesalahan sistem, silakan coba lagi nanti.")
+      }
     }
   } catch (error: any) {
     console.error("Login Error:", error)
-    if (error.response && error.response.status === 401) {
-      alert("Username atau Password salah!")
-    } else {
-      alert("Terjadi kesalahan sistem, silakan coba lagi nanti.")
-    }
+    alert("Gagal menghubungi server. Pastikan Backend berjalan di port 8083.")
   } finally {
     isLoading.value = false
   }
