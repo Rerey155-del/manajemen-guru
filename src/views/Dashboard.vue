@@ -100,7 +100,7 @@ const headers = {
   "Content-Type":"application/json"
 }
 
-const API = "http://localhost:8083/api/teachers"
+const API = "http://25.43.108.74:8083/api/teachers"
 
 
 
@@ -121,7 +121,6 @@ const fetchGuru = async () => {
     })
     
     if (!response.ok) throw new Error("Gagal mengambil data dari server")
-    
     const result = await response.json()
     console.log("Data Guru:", result.data)
     guruList.value = result.data || []
