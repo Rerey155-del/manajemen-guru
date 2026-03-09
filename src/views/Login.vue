@@ -93,11 +93,13 @@ const handleLogin = async () => {
       headers: {
         "Content-Type": "application/json"
       },
+      credentials: "include", // Penting untuk menyimpan session di browser
       body: JSON.stringify({
         username: username.value,
         password: password.value
       })
     })
+
 
     if (response.ok) {
       const data = await response.json()
