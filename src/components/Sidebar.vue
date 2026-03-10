@@ -1,5 +1,15 @@
 <script setup lang="ts">
 import { Icon } from "@iconify/vue";
+import { useAuth } from "@/composables/useAuth";
+import { useRouter } from "vue-router";
+
+const { logout } = useAuth();
+const router = useRouter();
+
+const handleLogout = () => {
+  logout();
+  router.push("/login");
+};
 </script>
 
 <template>
@@ -115,10 +125,13 @@ import { Icon } from "@iconify/vue";
       </li>
 
       <li class="mt-auto pt-6 border-t border-base-200">
-        <a class="text-error flex items-center gap-3 py-3 hover:bg-error/10">
+        <button
+          @click="handleLogout"
+          class="btn btn-ghost text-error flex items-center justify-start gap-3 py-3 hover:bg-error/10 w-full px-4 rounded-xl"
+        >
           <Icon icon="lucide:log-out" class="w-5 h-5" />
           <span>Logout</span>
-        </a>
+        </button>
       </li>
     </ul>
   </div>

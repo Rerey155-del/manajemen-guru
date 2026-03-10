@@ -27,7 +27,7 @@ const { profile, preferences, security, updateProfile, changePassword } =
       </div>
 
       <!-- Header Section -->
-      <header class="mb-10">
+      <header class="mb-10" data-aos="fade-down">
         <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">
           Settings
         </h1>
@@ -40,6 +40,8 @@ const { profile, preferences, security, updateProfile, changePassword } =
         <!-- Admin Profile -->
         <section
           class="bg-[#0f172a]/50 backdrop-blur-xl shadow-2xl border border-white/5 rounded-[2.5rem] p-8 lg:p-12"
+          data-aos="fade-up"
+          data-aos-delay="100"
         >
           <h2 class="text-xl font-bold text-white mb-8">Admin Profile</h2>
 
@@ -86,6 +88,8 @@ const { profile, preferences, security, updateProfile, changePassword } =
         <!-- App Preferences -->
         <section
           class="bg-[#0f172a]/50 backdrop-blur-xl shadow-2xl border border-white/5 rounded-[2.5rem] p-8 lg:p-12"
+          data-aos="fade-up"
+          data-aos-delay="200"
         >
           <h2 class="text-xl font-bold text-white mb-8">App Preferences</h2>
 
@@ -107,6 +111,8 @@ const { profile, preferences, security, updateProfile, changePassword } =
         <!-- Security Settings -->
         <section
           class="bg-[#0f172a]/50 backdrop-blur-xl shadow-2xl border border-white/5 rounded-[2.5rem] p-8 lg:p-12"
+          data-aos="fade-up"
+          data-aos-delay="300"
         >
           <h2 class="text-xl font-bold text-white mb-8">Security Settings</h2>
 

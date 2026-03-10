@@ -1,0 +1,144 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuth } from "@/composables/useAuth";
+import { Icon } from "@iconify/vue";
+
+const router = useRouter();
+const { login } = useAuth();
+
+const username = ref("");
+const password = ref("");
+const isLoading = ref(false);
+const error = ref("");
+
+const handleLogin = async () => {
+  if (!username.value || !password.value) {
+    error.value = "Please enter both username and password.";
+    return;
+  }
+
+  isLoading.value = true;
+  error.value = "";
+
+  // Simulate API delay
+  setTimeout(() => {
+    const success = login({ username: username.value, token: "mock-token-123" });
+    if (success) {
+      router.push("/");
+    } else {
+      error.value = "Invalid credentials. Please try again.";
+    }
+    isLoading.value = false;
+  }, 1000);
+};
+</script>
+
+<template>
+  <div
+    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] p-4 relative overflow-hidden"
+  >
+    <!-- Dynamic Background Elements -->
+    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full animate-pulse"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 blur-[120px] rounded-full animate-pulse" style="animation-delay: 2s"></div>
+
+    <div
+      class="w-full max-w-md bg-white/5 backdrop-blur-2xl border border-white/10 p-10 rounded-[2.5rem] shadow-2xl relative z-10"
+      data-aos="zoom-in"
+    >
+      <!-- Logo & Header -->
+      <div class="text-center mb-10">
+        <div
+          class="w-16 h-16 bg-primary text-primary-content flex items-center justify-center rounded-2xl font-black text-3xl shadow-2xl shadow-primary/40 mx-auto mb-6 transform hover:rotate-6 transition-transform duration-300"
+        >
+          S
+        </div>
+        <h1 class="text-3xl font-black text-white tracking-tight uppercase">
+          School<span class="text-primary font-black">V3</span>
+        </h1>
+        <p class="text-white/40 font-medium mt-2">Professional Management Suite</p>
+      </div>
+
+      <!-- Login Form -->
+      <form @submit.prevent="handleLogin" class="space-y-6">
+        <div v-if="error" class="alert alert-error bg-error/10 border-error/20 text-error rounded-xl font-bold py-3 flex gap-2">
+          <Icon icon="lucide:alert-circle" />
+          <span>{{ error }}</span>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-xs font-black uppercase tracking-widest text-white/40 ml-1">Username</label>
+          <div class="relative group">
+            <Icon
+              icon="lucide:user"
+              class="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors"
+            />
+            <input
+              v-model="username"
+              type="text"
+              placeholder="Enter your username"
+              class="input bg-[#0f172a]/50 border-white/5 rounded-2xl pl-12 w-full focus:border-primary/50 text-white font-medium h-14"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-xs font-black uppercase tracking-widest text-white/40 ml-1">Password</label>
+          <div class="relative group">
+            <Icon
+              icon="lucide:lock"
+              class="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors"
+            />
+            <input
+              v-model="password"
+              type="password"
+              placeholder="••••••••"
+              class="input bg-[#0f172a]/50 border-white/5 rounded-2xl pl-12 w-full focus:border-primary/50 text-white font-medium h-14"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between px-1">
+          <label class="flex items-center gap-2 cursor-pointer group">
+            <input type="checkbox" class="checkbox checkbox-primary checkbox-xs border-white/20 bg-white/5" />
+            <span class="text-xs font-bold text-white/40 group-hover:text-white/60 transition-colors">Remember me</span>
+          </label>
+          <a href="#" class="text-xs font-bold text-primary hover:underline underline-offset-4">Forgot Password?</a>
+        </div>
+
+        <button
+          type="submit"
+          :disabled="isLoading"
+          class="btn btn-primary w-full h-14 rounded-2xl font-black text-lg gap-3 shadow-xl shadow-primary/30 mt-4 border-none"
+        >
+          <span v-if="isLoading" class="loading loading-spinner loading-md"></span>
+          <span v-else>Authorize Access</span>
+          <Icon v-if="!isLoading" icon="lucide:arrow_right" class="w-5 h-5 text-white/50" />
+        </button>
+      </form>
+
+      <!-- Footer -->
+      <p class="text-center text-white/20 text-xs font-bold mt-10">
+        &copy; 2024 SchoolV3 Integrated Systems.<br />All rights reserved.
+      </p>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.input:focus {
+  outline: none;
+  @apply ring-4 ring-primary/10;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(1.1); }
+}
+
+.animate-pulse {
+  animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+</style>

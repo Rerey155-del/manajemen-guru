@@ -1,77 +1,83 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Dashboard from "../pages/dashboard/index.vue"
-import Teachers from "../pages/teachers/index.vue"
-import EditTeacher from "../pages/teachers/edit.vue"
-import Students from "../pages/students/index.vue"
-import EditStudent from "../pages/students/edit.vue"
-import Subjects from "../pages/subjects/index.vue"
-import EditSubject from "../pages/subjects/edit.vue"
-import Classes from "../pages/classes/index.vue"
-import EditClass from "../pages/classes/edit.vue"
-import Schedules from "../pages/schedules/index.vue"
-import EditSchedule from "../pages/schedules/edit.vue"
-import Settings from "../pages/settings/index.vue"
+import { useAuth } from '@/composables/useAuth'
 
 const routes = [
     {
+        path: '/login',
+        name: 'login',
+        component: () => import('@/pages/login/index.vue')
+    },
+    {
         path: '/',
         name : 'dashboard',
-        component: Dashboard
+        component: () => import('@/pages/dashboard/index.vue'),
+        meta: { requiresAuth: true }
     },
     {
         path: '/settings',
         name : 'settings',
-        component: Settings
+        component: () => import('@/pages/settings/index.vue'),
+        meta: { requiresAuth: true }
     },
     {
         path: '/teachers',
         name : 'teachers',
-        component: Teachers
+        component: () => import('@/pages/teachers/index.vue'),
+        meta: { requiresAuth: true }
     },
     {
         path: '/teachers/edit',
         name : 'edit-teacher',
-        component: EditTeacher
+        component: () => import('@/pages/teachers/edit.vue'),
+        meta: { requiresAuth: true }
     },
     {
         path: '/students',
         name : 'students',
-        component: Students
+        component: () => import('@/pages/students/index.vue'),
+        meta: { requiresAuth: true }
     },
     {
         path: '/students/edit',
         name : 'edit-student',
-        component: EditStudent
+        component: () => import('@/pages/students/edit.vue'),
+        meta: { requiresAuth: true }
     },
     {
         path: '/subjects',
         name : 'subjects',
-        component: Subjects
+        component: () => import('@/pages/subjects/index.vue'),
+        meta: { requiresAuth: true }
     },
     {
         path: '/subjects/edit',
         name : 'edit-subject',
-        component: EditSubject
+        component: () => import('@/pages/subjects/edit.vue'),
+        meta: { requiresAuth: true }
     },
     {
         path: '/classes',
         name : 'classes',
-        component: Classes
+        component: () => import('@/pages/classes/index.vue'),
+        meta: { requiresAuth: true }
     },
     {
         path: '/classes/edit',
         name : 'edit-class',
-        component: EditClass
+        component: () => import('@/pages/classes/edit.vue'),
+        meta: { requiresAuth: true }
     },
     {
         path: '/schedules',
         name : 'schedules',
-        component: Schedules
+        component: () => import('@/pages/schedules/index.vue'),
+        meta: { requiresAuth: true }
     },
     {
         path: '/schedules/edit',
         name : 'edit-schedule',
-        component: EditSchedule
+        component: () => import('@/pages/schedules/edit.vue'),
+        meta: { requiresAuth: true }
     }
 ]
 
@@ -80,4 +86,16 @@ const router = createRouter({
     routes
 })
 
-export default router
+router.beforeEach((to, from, next) => {
+  const { isAuthenticated } = useAuth()
+  
+  if (to.meta.requiresAuth && !isAuthenticated.value) {
+    next('/login')
+  } else if (to.path === '/login' && isAuthenticated.value) {
+    next('/')
+  } else {
+    next()
+  }
+})
+
+export default router

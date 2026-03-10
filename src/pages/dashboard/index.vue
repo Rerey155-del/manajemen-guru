@@ -28,6 +28,7 @@ const { stats, academicEvents, performanceProgress } = useDashboard();
       <!-- Header Section -->
       <header
         class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10"
+        data-aos="fade-down"
       >
         <div>
           <h1 class="text-4xl font-extrabold tracking-tight text-base-content">
@@ -86,9 +87,11 @@ const { stats, academicEvents, performanceProgress } = useDashboard();
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         <div
-          v-for="stat in stats"
+          v-for="(stat, index) in stats"
           :key="stat.label"
           class="group hover:-translate-y-1 transition-all duration-300"
+          data-aos="fade-up"
+          :data-aos-delay="index * 100"
         >
           <div
             class="stat bg-base-100 shadow-sm border border-base-200 rounded-3xl p-6 relative overflow-hidden"

@@ -43,7 +43,7 @@ const goBack = () => {
       </div>
 
       <!-- Header Section -->
-      <header class="flex items-center gap-4 mb-10">
+      <header class="flex items-center gap-4 mb-10" data-aos="fade-down">
         <button
           @click="goBack"
           class="btn btn-ghost btn-circle bg-white/5 border-white/5 hover:bg-white/10 text-white"
@@ -63,6 +63,8 @@ const goBack = () => {
       <div class="max-w-4xl">
         <div
           class="bg-[#0f172a]/50 backdrop-blur-xl shadow-2xl border border-white/5 rounded-[2.5rem] p-8 lg:p-12"
+          data-aos="fade-up"
+          data-aos-delay="200"
         >
           <div class="flex items-center gap-6 mb-12">
             <div

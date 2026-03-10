@@ -29,6 +29,7 @@ const { schedules } = useSchedules();
       <!-- Header Section -->
       <header
         class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10"
+        data-aos="fade-down"
       >
         <div>
           <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">
@@ -51,6 +52,8 @@ const { schedules } = useSchedules();
       <!-- Schedules Table -->
       <div
         class="bg-[#0f172a]/50 backdrop-blur-xl shadow-2xl border border-white/5 rounded-[2.5rem] overflow-hidden"
+        data-aos="fade-right"
+        data-aos-delay="200"
       >
         <div class="overflow-x-auto">
           <table class="table table-lg w-full">
