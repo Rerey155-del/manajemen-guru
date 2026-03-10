@@ -60,7 +60,7 @@ const goBack = () => {
         </div>
       </header>
 
-      <div class="max-w-4xl">
+      <div class="max-w-full">
         <div
           class="bg-[#0f172a]/50 backdrop-blur-xl shadow-2xl border border-white/5 rounded-[2.5rem] p-8 lg:p-12"
           data-aos="fade-up"

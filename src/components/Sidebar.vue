@@ -9,13 +9,13 @@ const router = useRouter();
 const route = useRoute();
 
 const i18n = {
-  brand: "SCHOOL",
+  brand: "Management Sekolah",
   version: "V3",
   logout: "Logout",
   menus: {
     main: "Main Menu",
     academic: "Academic Center",
-    system: "System & Preferences"
+    system: "System & Preferences",
   },
   items: {
     dashboard: "Dashboard",
@@ -24,14 +24,18 @@ const i18n = {
     subjects: "Subjects",
     classes: "Classes",
     schedules: "Schedules",
-    settings: "Settings"
-  }
+    settings: "Settings",
+  },
 };
 
 const menuItems = [
   { name: i18n.items.dashboard, path: "/", icon: "lucide:layout-dashboard" },
   { name: i18n.items.teachers, path: "/teachers", icon: "lucide:users" },
-  { name: i18n.items.students, path: "/students", icon: "lucide:graduation-cap" },
+  {
+    name: i18n.items.students,
+    path: "/students",
+    icon: "lucide:graduation-cap",
+  },
   { name: i18n.items.subjects, path: "/subjects", icon: "lucide:book-open" },
   { name: i18n.items.classes, path: "/classes", icon: "lucide:school" },
   { name: i18n.items.schedules, path: "/schedules", icon: "lucide:calendar" },
@@ -60,14 +64,10 @@ const handleLogout = () => {
     >
       <!-- Logo -->
       <li class="mb-6 px-4 py-2">
-        <div class="flex items-center gap-3">
-          <div
-            class="w-10 h-10 bg-primary text-primary-content flex items-center justify-center rounded-xl font-black text-xl shadow-lg shadow-primary/20"
-          >
-            S
-          </div>
+        <div>
           <span class="text-2xl font-black tracking-tight"
-            >{{ i18n.brand }}<span class="text-primary">{{ i18n.version }}</span></span
+            >{{ i18n.brand
+            }}<span class="text-primary"> {{ i18n.version }}</span></span
           >
         </div>
       </li>
@@ -81,7 +81,9 @@ const handleLogout = () => {
         <router-link
           to="/"
           class="flex items-center gap-3 py-3"
-          :class="{ 'active bg-primary/10 text-primary font-bold': isActive('/') }"
+          :class="{
+            'active bg-primary/10 text-primary font-bold': isActive('/'),
+          }"
         >
           <Icon icon="lucide:layout-dashboard" class="w-5 h-5" />
           <span>{{ i18n.items.dashboard }}</span>
@@ -97,7 +99,9 @@ const handleLogout = () => {
         <router-link
           :to="item.path"
           class="flex items-center gap-3 py-3"
-          :class="{ 'active bg-primary/10 text-primary font-bold': isActive(item.path) }"
+          :class="{
+            'active bg-primary/10 text-primary font-bold': isActive(item.path),
+          }"
         >
           <Icon :icon="item.icon" class="w-5 h-5" />
           <span>{{ item.name }}</span>
@@ -113,7 +117,10 @@ const handleLogout = () => {
         <router-link
           to="/settings"
           class="flex items-center gap-3 py-3"
-          :class="{ 'active bg-primary/10 text-primary font-bold': isActive('/settings') }"
+          :class="{
+            'active bg-primary/10 text-primary font-bold':
+              isActive('/settings'),
+          }"
         >
           <Icon icon="lucide:settings" class="w-5 h-5" />
           <span>{{ i18n.items.settings }}</span>

@@ -59,7 +59,7 @@ const i18n = {
         </p>
       </header>
 
-      <div class="space-y-8 max-w-4xl">
+      <div class="space-y-8 w-full">
         <!-- Admin Profile -->
         <section
           class="bg-base-100 backdrop-blur-xl shadow-2xl border border-base-content/5 rounded-[2.5rem] p-8 lg:p-12"
