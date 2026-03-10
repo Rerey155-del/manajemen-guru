@@ -1,8 +1,38 @@
 <script setup lang="ts">
 import Sidebar from "@/components/Sidebar.vue";
+import { Icon } from "@iconify/vue";
 import { useSubjects } from "@/composables/useSubjects";
+import { ref, computed } from "vue";
 
 const { subjects } = useSubjects();
+
+// Search and Pagination Logic
+const searchQuery = ref("");
+const currentPage = ref(1);
+const itemsPerPage = 5;
+
+const filteredSubjects = computed(() => {
+  return subjects.value.filter((s) =>
+    s.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+const totalPages = computed(() =>
+  Math.ceil(filteredSubjects.value.length / itemsPerPage)
+);
+
+const paginatedSubjects = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredSubjects.value.slice(start, end);
+});
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+};
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--;
+};
 </script>
 
 <template>
@@ -15,14 +45,11 @@ const { subjects } = useSubjects();
         class="flex items-center justify-between lg:hidden mb-6 bg-base-100 p-4 rounded-2xl shadow-sm"
       >
         <label for="my-drawer-2" class="btn btn-ghost btn-circle drawer-button">
-          <i class="fas fa-bars text-xl"></i>
+          <Icon icon="lucide:menu" class="text-xl" />
         </label>
         <span class="text-xl font-bold tracking-tight"
           >SCHOOL<span class="text-primary">V3</span></span
         >
-        <div class="avatar w-8 h-8 rounded-full overflow-hidden">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" />
-        </div>
       </div>
 
       <!-- Header Section -->
@@ -37,11 +64,25 @@ const { subjects } = useSubjects();
             Curriculum management for all grades and specialization.
           </p>
         </div>
-        <div>
+        <div class="flex items-center gap-3">
+          <!-- Search Bar -->
+          <div class="relative group">
+            <Icon
+              icon="lucide:search"
+              class="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors"
+            />
+            <input
+              v-model="searchQuery"
+              @input="currentPage = 1"
+              type="text"
+              placeholder="Search by name..."
+              class="input bg-[#0f172a]/50 border-white/5 rounded-xl pl-12 w-64 focus:border-primary/50 text-white font-medium"
+            />
+          </div>
           <button
             class="btn btn-primary rounded-xl px-6 font-bold gap-2 shadow-lg shadow-primary/20 capitalize"
           >
-            <i class="fas fa-plus text-sm"></i>
+            <Icon icon="lucide:plus" class="text-sm" />
             Define New Subject
           </button>
         </div>
@@ -49,7 +90,7 @@ const { subjects } = useSubjects();
 
       <!-- Subjects Table -->
       <div
-        class="bg-[#0f172a]/50 backdrop-blur-xl shadow-2xl border border-white/5 rounded-[2.5rem] overflow-hidden"
+        class="bg-[#0f172a]/50 backdrop-blur-xl shadow-2xl border border-white/5 rounded-[2.5rem] overflow-hidden flex flex-col"
       >
         <div class="overflow-x-auto">
           <table class="table table-lg w-full">
@@ -65,7 +106,7 @@ const { subjects } = useSubjects();
             </thead>
             <tbody>
               <tr
-                v-for="sub in subjects"
+                v-for="sub in paginatedSubjects"
                 :key="sub.id"
                 class="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
               >
@@ -89,33 +130,68 @@ const { subjects } = useSubjects();
                   </div>
                 </td>
                 <td class="pr-12 py-10 text-right">
-                  <div class="flex justify-end gap-4">
-                    <button
-                      class="btn btn-ghost btn-sm btn-circle text-white/40 hover:text-white transition-colors"
+                  <div
+                    class="flex justify-end opacity-40 hover:opacity-100 transition-opacity"
+                  >
+                    <router-link
+                      to="/subjects/edit"
+                      class="btn btn-ghost btn-sm btn-circle text-white"
                     >
-                      <i class="fas fa-sliders-h"></i>
-                    </button>
-                    <button
-                      class="btn btn-ghost btn-sm btn-circle text-error/40 hover:text-error transition-colors"
-                    >
-                      <i class="fas fa-trash"></i>
-                    </button>
+                      <Icon icon="lucide:edit-3" class="w-4 h-4" />
+                    </router-link>
                   </div>
+                </td>
+              </tr>
+              <tr v-if="paginatedSubjects.length === 0">
+                <td
+                  colspan="4"
+                  class="py-20 text-center text-white/20 font-bold italic"
+                >
+                  No results found for "{{ searchQuery }}"
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+
+        <!-- Pagination Controls -->
+        <div
+          class="p-6 border-t border-white/5 flex items-center justify-between bg-black/10"
+        >
+          <span class="text-white/20 text-sm font-bold"
+            >Showing {{ paginatedSubjects.length }} of
+            {{ filteredSubjects.length }} Subjects</span
+          >
+          <div class="join bg-[#020617]/50 rounded-xl border border-white/5">
+            <button
+              @click="prevPage"
+              :disabled="currentPage === 1"
+              class="btn btn-ghost join-item btn-sm text-white/40 disabled:opacity-10"
+            >
+              <Icon icon="lucide:chevron-left" />
+            </button>
+            <button
+              class="btn btn-ghost join-item btn-sm text-primary font-black px-4"
+            >
+              Page {{ currentPage }}
+            </button>
+            <button
+              @click="nextPage"
+              :disabled="currentPage >= totalPages"
+              class="btn btn-ghost join-item btn-sm text-white/40 disabled:opacity-10"
+            >
+              <Icon icon="lucide:chevron-right" />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Sidebar Component -->
     <Sidebar />
   </div>
 </template>
 
 <style scoped>
-/* High performance scrolling */
 .drawer-content {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--p) / 0.1) transparent;

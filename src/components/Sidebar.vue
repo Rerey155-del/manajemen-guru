@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Sidebar component
+import { Icon } from "@iconify/vue";
 </script>
 
 <template>
@@ -37,7 +37,7 @@
           class="flex items-center gap-3 py-3"
           active-class="active bg-primary/10 text-primary font-bold"
         >
-          <i class="fas fa-columns w-5 text-center text-lg"></i>
+          <Icon icon="lucide:layout-dashboard" class="w-5 h-5" />
           <span>Dashboard</span>
         </router-link>
       </li>
@@ -53,7 +53,7 @@
           class="flex items-center gap-3 py-3"
           active-class="active bg-primary/10 text-primary font-bold"
         >
-          <i class="fas fa-chalkboard-teacher w-5 text-center"></i>
+          <Icon icon="lucide:users" class="w-5 h-5" />
           <span>Teachers</span>
         </router-link>
       </li>
@@ -63,7 +63,7 @@
           class="flex items-center gap-3 py-3"
           active-class="active bg-primary/10 text-primary font-bold"
         >
-          <i class="fas fa-user-graduate w-5 text-center"></i>
+          <Icon icon="lucide:graduation-cap" class="w-5 h-5" />
           <span>Students</span>
         </router-link>
       </li>
@@ -73,7 +73,7 @@
           class="flex items-center gap-3 py-3"
           active-class="active bg-primary/10 text-primary font-bold"
         >
-          <i class="fas fa-book-open w-5 text-center"></i>
+          <Icon icon="lucide:book-open" class="w-5 h-5" />
           <span>Subjects</span>
         </router-link>
       </li>
@@ -83,7 +83,7 @@
           class="flex items-center gap-3 py-3"
           active-class="active bg-primary/10 text-primary font-bold"
         >
-          <i class="fas fa-school w-5 text-center"></i>
+          <Icon icon="lucide:school" class="w-5 h-5" />
           <span>Classes</span>
         </router-link>
       </li>
@@ -93,7 +93,7 @@
           class="flex items-center gap-3 py-3"
           active-class="active bg-primary/10 text-primary font-bold"
         >
-          <i class="fas fa-calendar-alt w-5 text-center text-lg"></i>
+          <Icon icon="lucide:calendar" class="w-5 h-5" />
           <span>Schedules</span>
         </router-link>
       </li>
@@ -101,22 +101,22 @@
       <li
         class="menu-title uppercase text-xs font-bold tracking-widest text-base-content/40 mt-6"
       >
-        Administration
+        System & Preferences
       </li>
       <li>
         <router-link
-          to="/users"
+          to="/settings"
           class="flex items-center gap-3 py-3"
           active-class="active bg-primary/10 text-primary font-bold"
         >
-          <i class="fas fa-user-shield w-5 text-center"></i>
-          <span>Users Management</span>
+          <Icon icon="lucide:settings" class="w-5 h-5" />
+          <span>Settings</span>
         </router-link>
       </li>
 
       <li class="mt-auto pt-6 border-t border-base-200">
         <a class="text-error flex items-center gap-3 py-3 hover:bg-error/10">
-          <i class="fas fa-sign-out-alt w-5 text-center"></i>
+          <Icon icon="lucide:log-out" class="w-5 h-5" />
           <span>Logout</span>
         </a>
       </li>

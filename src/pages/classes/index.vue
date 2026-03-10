@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Sidebar from "@/components/Sidebar.vue";
+import { Icon } from "@iconify/vue";
 import { useClasses } from "@/composables/useClasses";
 
 const { classes } = useClasses();
@@ -15,7 +16,7 @@ const { classes } = useClasses();
         class="flex items-center justify-between lg:hidden mb-6 bg-base-100 p-4 rounded-2xl shadow-sm"
       >
         <label for="my-drawer-2" class="btn btn-ghost btn-circle drawer-button">
-          <i class="fas fa-bars text-xl"></i>
+          <Icon icon="lucide:menu" class="text-xl" />
         </label>
         <span class="text-xl font-bold tracking-tight"
           >SCHOOL<span class="text-primary">V3</span></span
@@ -41,7 +42,7 @@ const { classes } = useClasses();
           <button
             class="btn btn-primary rounded-xl px-6 font-bold gap-2 shadow-lg shadow-primary/20 capitalize"
           >
-            <i class="fas fa-plus text-sm"></i>
+            <Icon icon="lucide:plus" class="text-sm" />
             Initialize Room
           </button>
         </div>
@@ -76,32 +77,22 @@ const { classes } = useClasses();
                   {{ cls.roomId }}
                 </td>
                 <td class="py-10">
-                  <div class="flex flex-col gap-2 w-48">
-                    <div
-                      class="flex justify-between text-xs font-bold text-white/90"
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-lg text-white/90"
+                      >{{ cls.currentStudents }} Orang</span
                     >
-                      <span
-                        >{{ cls.currentStudents }} /
-                        {{ cls.capacity }} Students</span
-                      >
-                    </div>
-                    <progress
-                      class="progress progress-primary w-full h-1.5 bg-white/5"
-                      :value="cls.currentStudents"
-                      :max="cls.capacity"
-                    ></progress>
                   </div>
                 </td>
                 <td class="pr-12 py-10 text-right">
                   <div
-                    class="flex justify-end gap-4 opacity-40 hover:opacity-100 transition-opacity"
+                    class="flex justify-end opacity-40 hover:opacity-100 transition-opacity"
                   >
-                    <button class="btn btn-ghost btn-sm btn-circle text-white">
-                      <i class="fas fa-cog"></i>
-                    </button>
-                    <button class="btn btn-ghost btn-sm btn-circle text-white">
-                      <i class="fas fa-users-cog"></i>
-                    </button>
+                    <router-link
+                      to="/classes/edit"
+                      class="btn btn-ghost btn-sm btn-circle text-white"
+                    >
+                      <Icon icon="lucide:edit-3" class="w-4 h-4" />
+                    </router-link>
                   </div>
                 </td>
               </tr>

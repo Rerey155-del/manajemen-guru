@@ -1,8 +1,38 @@
 <script setup lang="ts">
 import Sidebar from "@/components/Sidebar.vue";
+import { Icon } from "@iconify/vue";
 import { useTeachers } from "@/composables/useTeachers";
+import { ref, computed } from "vue";
 
 const { teachers } = useTeachers();
+
+// Search and Pagination Logic
+const searchQuery = ref("");
+const currentPage = ref(1);
+const itemsPerPage = 5;
+
+const filteredTeachers = computed(() => {
+  return teachers.value.filter((t) =>
+    t.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+const totalPages = computed(() =>
+  Math.ceil(filteredTeachers.value.length / itemsPerPage)
+);
+
+const paginatedTeachers = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredTeachers.value.slice(start, end);
+});
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+};
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--;
+};
 </script>
 
 <template>
@@ -15,14 +45,11 @@ const { teachers } = useTeachers();
         class="flex items-center justify-between lg:hidden mb-6 bg-base-100 p-4 rounded-2xl shadow-sm"
       >
         <label for="my-drawer-2" class="btn btn-ghost btn-circle drawer-button">
-          <i class="fas fa-bars text-xl"></i>
+          <Icon icon="lucide:menu" class="text-xl" />
         </label>
         <span class="text-xl font-bold tracking-tight"
           >SCHOOL<span class="text-primary">V3</span></span
         >
-        <div class="avatar w-8 h-8 rounded-full overflow-hidden">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" />
-        </div>
       </div>
 
       <!-- Header Section -->
@@ -31,25 +58,39 @@ const { teachers } = useTeachers();
       >
         <div>
           <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">
-            Teachers Directory
+            Faculty Directory
           </h1>
           <p class="text-base-content/40 font-medium">
-            Managing academic faculty and professional credentials.
+            Professional profiles of administrative and teaching staff.
           </p>
         </div>
-        <div>
+        <div class="flex items-center gap-3">
+          <!-- Search Bar -->
+          <div class="relative group">
+            <Icon
+              icon="lucide:search"
+              class="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors"
+            />
+            <input
+              v-model="searchQuery"
+              @input="currentPage = 1"
+              type="text"
+              placeholder="Search by name..."
+              class="input bg-[#0f172a]/50 border-white/5 rounded-xl pl-12 w-64 focus:border-primary/50 text-white font-medium"
+            />
+          </div>
           <button
             class="btn btn-primary rounded-xl px-6 font-bold gap-2 shadow-lg shadow-primary/20 capitalize"
           >
-            <i class="fas fa-user-plus text-sm"></i>
-            Onboard Teacher
+            <Icon icon="lucide:user-plus" class="text-sm" />
+            Add New Teacher
           </button>
         </div>
       </header>
 
       <!-- Teachers Table -->
       <div
-        class="bg-[#0f172a]/50 backdrop-blur-xl shadow-2xl border border-white/5 rounded-[2.5rem] overflow-hidden"
+        class="bg-[#0f172a]/50 backdrop-blur-xl shadow-2xl border border-white/5 rounded-[2.5rem] overflow-hidden flex flex-col"
       >
         <div class="overflow-x-auto">
           <table class="table table-lg w-full">
@@ -57,16 +98,17 @@ const { teachers } = useTeachers();
               <tr
                 class="text-base-content/30 font-bold uppercase tracking-widest text-[10px] border-b border-white/5"
               >
-                <th class="pl-12 py-8">Full Name</th>
+                <th class="pl-12 py-8">Teacher Identity</th>
                 <th class="py-8">NIP / NIK</th>
-                <th class="py-8">Department</th>
-                <th class="py-8">Status</th>
+                <th class="py-8">Institutional Email</th>
+                <th class="py-8 text-center">Department</th>
+                <th class="py-8 text-center">Status</th>
                 <th class="pr-12 py-8 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr
-                v-for="teacher in teachers"
+                v-for="teacher in paginatedTeachers"
                 :key="teacher.id"
                 class="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
               >
@@ -76,14 +118,7 @@ const { teachers } = useTeachers();
                       <div
                         class="bg-primary/10 text-primary font-black rounded-xl w-10 shadow-sm border border-primary/20 uppercase"
                       >
-                        <span
-                          >{{ teacher.name.split(" ")[0][0]
-                          }}{{
-                            teacher.name.split(" ")[1]
-                              ? teacher.name.split(" ")[1][0]
-                              : ""
-                          }}</span
-                        >
+                        <span>{{ teacher.name[0] }}</span>
                       </div>
                     </div>
                     <span class="font-bold text-lg text-white/90">{{
@@ -97,9 +132,15 @@ const { teachers } = useTeachers();
                   {{ teacher.nip }}
                 </td>
                 <td class="py-10 font-medium text-lg text-white/70">
-                  {{ teacher.department }}
+                  {{ teacher.email }}
                 </td>
-                <td class="py-10">
+                <td class="py-10 text-center">
+                  <span
+                    class="px-5 py-2.5 bg-white/5 text-white/40 rounded-xl font-bold text-xs border border-white/5"
+                    >{{ teacher.department }}</span
+                  >
+                </td>
+                <td class="py-10 text-center">
                   <span
                     :class="`badge badge-sm font-black uppercase text-[10px] p-2 h-auto ${
                       teacher.status === 'Active'
@@ -112,24 +153,63 @@ const { teachers } = useTeachers();
                 </td>
                 <td class="pr-12 py-10 text-right">
                   <div
-                    class="flex justify-end gap-3 opacity-40 hover:opacity-100 transition-opacity"
+                    class="flex justify-end opacity-40 hover:opacity-100 transition-opacity"
                   >
-                    <button class="btn btn-ghost btn-sm btn-circle text-white">
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-ghost btn-sm btn-circle text-white">
-                      <i class="fas fa-id-card"></i>
-                    </button>
+                    <router-link
+                      :to="`/teachers/edit`"
+                      class="btn btn-ghost btn-sm btn-circle text-white"
+                    >
+                      <Icon icon="lucide:edit-3" class="w-4 h-4" />
+                    </router-link>
                   </div>
+                </td>
+              </tr>
+              <!-- Empty State -->
+              <tr v-if="paginatedTeachers.length === 0">
+                <td
+                  colspan="6"
+                  class="py-20 text-center text-white/20 font-bold italic"
+                >
+                  No results found for "{{ searchQuery }}"
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+
+        <!-- Pagination Controls -->
+        <div
+          class="p-6 border-t border-white/5 flex items-center justify-between bg-black/10"
+        >
+          <span class="text-white/20 text-sm font-bold"
+            >Showing {{ paginatedTeachers.length }} of
+            {{ filteredTeachers.length }} Staff</span
+          >
+          <div class="join bg-[#020617]/50 rounded-xl border border-white/5">
+            <button
+              @click="prevPage"
+              :disabled="currentPage === 1"
+              class="btn btn-ghost join-item btn-sm text-white/40 disabled:opacity-10"
+            >
+              <Icon icon="lucide:chevron-left" />
+            </button>
+            <button
+              class="btn btn-ghost join-item btn-sm text-primary font-black px-4"
+            >
+              Page {{ currentPage }}
+            </button>
+            <button
+              @click="nextPage"
+              :disabled="currentPage >= totalPages"
+              class="btn btn-ghost join-item btn-sm text-white/40 disabled:opacity-10"
+            >
+              <Icon icon="lucide:chevron-right" />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Sidebar Component -->
     <Sidebar />
   </div>
 </template>

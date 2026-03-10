@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Sidebar from "@/components/Sidebar.vue";
+import { Icon } from "@iconify/vue";
 import { useSchedules } from "@/composables/useSchedules";
 
 const { schedules } = useSchedules();
@@ -15,7 +16,7 @@ const { schedules } = useSchedules();
         class="flex items-center justify-between lg:hidden mb-6 bg-base-100 p-4 rounded-2xl shadow-sm"
       >
         <label for="my-drawer-2" class="btn btn-ghost btn-circle drawer-button">
-          <i class="fas fa-bars text-xl"></i>
+          <Icon icon="lucide:menu" class="text-xl" />
         </label>
         <span class="text-xl font-bold tracking-tight"
           >SCHOOL<span class="text-primary">V3</span></span
@@ -41,7 +42,7 @@ const { schedules } = useSchedules();
           <button
             class="btn btn-primary rounded-xl px-6 font-bold gap-2 shadow-lg shadow-primary/20 capitalize"
           >
-            <i class="fas fa-calendar-check text-sm"></i>
+            <Icon icon="lucide:calendar-plus" class="text-sm" />
             Slot Allocation
           </button>
         </div>
@@ -61,7 +62,8 @@ const { schedules } = useSchedules();
                 <th class="py-8">Day</th>
                 <th class="py-8">Period / Duration</th>
                 <th class="py-8">Instructor</th>
-                <th class="pr-12 py-8">Subject</th>
+                <th class="py-8">Subject</th>
+                <th class="pr-12 py-8 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -86,8 +88,20 @@ const { schedules } = useSchedules();
                 <td class="py-10 text-lg font-medium text-white/70">
                   {{ sch.teacher }}
                 </td>
-                <td class="pr-12 py-10 font-bold text-lg text-[#6366f1]">
+                <td class="py-10 font-bold text-lg text-[#6366f1]">
                   {{ sch.subject }}
+                </td>
+                <td class="pr-12 py-10 text-right">
+                  <div
+                    class="flex justify-end opacity-40 hover:opacity-100 transition-opacity"
+                  >
+                    <router-link
+                      to="/schedules/edit"
+                      class="btn btn-ghost btn-sm btn-circle text-white"
+                    >
+                      <Icon icon="lucide:edit-3" class="w-4 h-4" />
+                    </router-link>
+                  </div>
                 </td>
               </tr>
             </tbody>
