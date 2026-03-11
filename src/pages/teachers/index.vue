@@ -4,7 +4,27 @@ import { Icon } from "@iconify/vue";
 import { useTeachers } from "@/composables/useTeachers";
 import { ref, computed } from "vue";
 
-const { teachers } = useTeachers();
+const { teachers, updateTeacher } = useTeachers();
+
+const isEditModalOpen = ref(false);
+const editForm = ref({
+  id: 0,
+  name: "",
+  nip: "",
+  email: "",
+  department: "",
+  status: "Active"
+});
+
+const openEditModal = (teacher: any) => {
+  editForm.value = { ...teacher };
+  isEditModalOpen.value = true;
+};
+
+const handleUpdate = async () => {
+  await updateTeacher(editForm.value.id, editForm.value);
+  isEditModalOpen.value = false;
+};
 
 const i18n = {
   brand: "SCHOOL",
@@ -186,12 +206,12 @@ const prevPage = () => {
                   <div
                     class="flex justify-end opacity-40 hover:opacity-100 transition-opacity"
                   >
-                    <router-link
-                      :to="`/teachers/edit`"
+                    <button
+                      @click="() => openEditModal(teacher)"
                       class="btn btn-ghost btn-sm btn-circle text-base-content"
                     >
                       <Icon icon="lucide:edit-3" class="w-4 h-4" />
-                    </router-link>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -240,6 +260,46 @@ const prevPage = () => {
         </div>
       </div>
     </div>
+
+    <!-- Edit Modal -->
+    <dialog class="modal font-sans" :class="{ 'modal-open': isEditModalOpen }">
+      <div class="modal-box rounded-[2rem] p-8 shadow-2xl bg-base-100 border border-base-content/5">
+        <h3 class="font-extrabold text-2xl mb-6">Edit Teacher Data</h3>
+        <form @submit.prevent="handleUpdate" class="flex flex-col gap-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Name</span></label>
+            <input v-model="editForm.name" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">NIP / NIK</span></label>
+            <input v-model="editForm.nip" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Email</span></label>
+            <input v-model="editForm.email" type="email" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Department</span></label>
+            <input v-model="editForm.department" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Status</span></label>
+            <select v-model="editForm.status" class="select select-bordered focus:border-primary rounded-xl" required>
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+              <option value="Non-Aktif">Non-Aktif</option>
+            </select>
+          </div>
+          <div class="modal-action mt-6 gap-2">
+            <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="isEditModalOpen = false">Cancel</button>
+            <button type="submit" class="btn btn-primary rounded-xl font-bold px-8 shadow-lg shadow-primary/20">Save Updates</button>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop bg-base-300/60 backdrop-blur-sm">
+        <button @click="isEditModalOpen = false">close</button>
+      </form>
+    </dialog>
 
     <Sidebar />
   </div>

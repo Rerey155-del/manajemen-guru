@@ -2,8 +2,26 @@
 import Sidebar from "@/components/Sidebar.vue";
 import { Icon } from "@iconify/vue";
 import { useClasses } from "@/composables/useClasses";
+import { ref } from "vue";
+const { classes, updateClass } = useClasses();
 
-const { classes } = useClasses();
+const isEditModalOpen = ref(false);
+const editForm = ref({
+  id: 0,
+  class_designation: "",
+  room_id: "",
+  utilization: ""
+});
+
+const openEditModal = (cls: any) => {
+  editForm.value = { ...cls };
+  isEditModalOpen.value = true;
+};
+
+const handleUpdate = async () => {
+  await updateClass(editForm.value.id, editForm.value);
+  isEditModalOpen.value = false;
+};
 
 const i18n = {
   brand: "SCHOOL",
@@ -93,15 +111,15 @@ const i18n = {
                 class="border-b border-base-content/5 last:border-0 hover:bg-base-content/[0.02] transition-colors"
               >
                 <td class="pl-12 py-10 font-bold text-lg text-base-content/90">
-                  {{ cls.name }}
+                  {{ cls.class_designation }}
                 </td>
                 <td class="py-10 font-medium text-lg text-base-content/40">
-                  {{ cls.roomId }}
+                  {{ cls.room_id }}
                 </td>
                 <td class="py-10">
                   <div class="flex items-center gap-2">
                     <span class="font-bold text-lg text-base-content/90"
-                      >{{ cls.currentStudents }} {{ i18n.table.unit }}</span
+                      >{{ cls.utilization }}</span
                     >
                   </div>
                 </td>
@@ -109,12 +127,12 @@ const i18n = {
                   <div
                     class="flex justify-end opacity-40 hover:opacity-100 transition-opacity"
                   >
-                    <router-link
-                      to="/classes/edit"
+                    <button
+                      @click="() => openEditModal(cls)"
                       class="btn btn-ghost btn-sm btn-circle text-base-content"
                     >
                       <Icon icon="lucide:edit-3" class="w-4 h-4" />
-                    </router-link>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -123,6 +141,34 @@ const i18n = {
         </div>
       </div>
     </div>
+
+    <!-- Edit Modal -->
+    <dialog class="modal font-sans" :class="{ 'modal-open': isEditModalOpen }">
+      <div class="modal-box rounded-[2rem] p-8 shadow-2xl bg-base-100 border border-base-content/5">
+        <h3 class="font-extrabold text-2xl mb-6">Edit Class Data</h3>
+        <form @submit.prevent="handleUpdate" class="flex flex-col gap-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Class Designation</span></label>
+            <input v-model="editForm.class_designation" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Room ID</span></label>
+            <input v-model="editForm.room_id" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Utilization (current/max)</span></label>
+            <input v-model="editForm.utilization" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="modal-action mt-6 gap-2">
+            <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="isEditModalOpen = false">Cancel</button>
+            <button type="submit" class="btn btn-primary rounded-xl font-bold px-8 shadow-lg shadow-primary/20">Save Updates</button>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop bg-base-300/60 backdrop-blur-sm">
+        <button @click="isEditModalOpen = false">close</button>
+      </form>
+    </dialog>
 
     <!-- Sidebar Component -->
     <Sidebar />

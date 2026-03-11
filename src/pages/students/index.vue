@@ -4,7 +4,27 @@ import { Icon } from "@iconify/vue";
 import { useStudents } from "@/composables/useStudents";
 import { ref, computed } from "vue";
 
-const { students } = useStudents();
+const { students, updateStudent } = useStudents();
+
+const isEditModalOpen = ref(false);
+const editForm = ref({
+  id: 0,
+  name: "",
+  nis: "",
+  gender: "",
+  class_name: "",
+  enrollment_status: "Active"
+});
+
+const openEditModal = (student: any) => {
+  editForm.value = { ...student };
+  isEditModalOpen.value = true;
+};
+
+const handleUpdate = async () => {
+  await updateStudent(editForm.value.id, editForm.value);
+  isEditModalOpen.value = false;
+};
 
 const i18n = {
   brand: "SCHOOL",
@@ -181,12 +201,12 @@ const prevPage = () => {
                   <div
                     class="flex justify-end opacity-40 hover:opacity-100 transition-opacity"
                   >
-                    <router-link
-                      to="/students/edit"
+                    <button
+                      @click="() => openEditModal(student)"
                       class="btn btn-ghost btn-sm btn-circle text-base-content"
                     >
                       <Icon icon="lucide:edit-3" class="w-4 h-4" />
-                    </router-link>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -234,6 +254,49 @@ const prevPage = () => {
         </div>
       </div>
     </div>
+
+    <!-- Edit Modal -->
+    <dialog class="modal font-sans" :class="{ 'modal-open': isEditModalOpen }">
+      <div class="modal-box rounded-[2rem] p-8 shadow-2xl bg-base-100 border border-base-content/5">
+        <h3 class="font-extrabold text-2xl mb-6">Edit Student Data</h3>
+        <form @submit.prevent="handleUpdate" class="flex flex-col gap-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Name</span></label>
+            <input v-model="editForm.name" type="text" class="input input-bordered focus:border-secondary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">NIS</span></label>
+            <input v-model="editForm.nis" type="text" class="input input-bordered focus:border-secondary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Gender</span></label>
+            <select v-model="editForm.gender" class="select select-bordered focus:border-secondary rounded-xl" required>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Class Name</span></label>
+            <input v-model="editForm.class_name" type="text" class="input input-bordered focus:border-secondary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Enrollment Status</span></label>
+            <select v-model="editForm.enrollment_status" class="select select-bordered focus:border-secondary rounded-xl" required>
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+              <option value="Graduated">Graduated</option>
+            </select>
+          </div>
+          <div class="modal-action mt-6 gap-2">
+            <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="isEditModalOpen = false">Cancel</button>
+            <button type="submit" class="btn btn-secondary rounded-xl font-bold px-8 shadow-lg shadow-secondary/20">Save Updates</button>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop bg-base-300/60 backdrop-blur-sm">
+        <button @click="isEditModalOpen = false">close</button>
+      </form>
+    </dialog>
 
     <Sidebar />
   </div>

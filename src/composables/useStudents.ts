@@ -19,5 +19,14 @@ export function useStudents() {
     { id: 15, name: "Olivia Mitchell", nis: "20231015", gender: "Female", class_name: "XII - Arts", enrollment_status: "Active" }
   ]);
 
-  return { students }
+  const updateStudent = async (id: number, data: any) => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const index = students.value.findIndex(t => t.id === id);
+    if (index !== -1) {
+      students.value[index] = { ...students.value[index], ...data };
+    }
+  };
+
+  return { students, updateStudent }
 }

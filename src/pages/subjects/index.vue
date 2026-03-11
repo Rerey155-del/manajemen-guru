@@ -4,7 +4,28 @@ import { Icon } from "@iconify/vue";
 import { useSubjects } from "@/composables/useSubjects";
 import { ref, computed } from "vue";
 
-const { subjects } = useSubjects();
+const { subjects, updateSubject } = useSubjects();
+
+const isEditModalOpen = ref(false);
+const editForm = ref({
+  id: 0,
+  subject_name: "",
+  academic_code: "",
+  metadata: [] as string[]
+});
+const metadataInput = ref("");
+
+const openEditModal = (subject: any) => {
+  editForm.value = { ...subject };
+  metadataInput.value = subject.metadata ? subject.metadata.join(", ") : "";
+  isEditModalOpen.value = true;
+};
+
+const handleUpdate = async () => {
+  editForm.value.metadata = metadataInput.value.split(",").map((t: string) => t.trim()).filter(Boolean);
+  await updateSubject(editForm.value.id, editForm.value);
+  isEditModalOpen.value = false;
+};
 
 const i18n = {
   brand: "SCHOOL",
@@ -39,7 +60,7 @@ const itemsPerPage = 5;
 
 const filteredSubjects = computed(() => {
   return subjects.value.filter((s) =>
-    s.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    s.subject_name.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
 
@@ -140,17 +161,17 @@ const prevPage = () => {
                 class="border-b border-base-content/5 last:border-0 hover:bg-base-content/[0.02] transition-colors"
               >
                 <td class="pl-12 py-10 font-bold text-lg text-primary">
-                  {{ sub.name }}
+                  {{ sub.subject_name }}
                 </td>
                 <td
                   class="py-10 font-bold text-lg text-base-content/40 font-mono tracking-tighter"
                 >
-                  {{ sub.code }}
+                  {{ sub.academic_code }}
                 </td>
                 <td class="py-10">
                   <div class="flex gap-2">
                     <span
-                      v-for="tag in sub.tags"
+                      v-for="tag in sub.metadata"
                       :key="tag"
                       class="px-4 py-1.5 bg-base-content/5 text-base-content/40 rounded-lg text-[10px] font-bold border border-base-content/5"
                     >
@@ -162,12 +183,12 @@ const prevPage = () => {
                   <div
                     class="flex justify-end opacity-40 hover:opacity-100 transition-opacity"
                   >
-                    <router-link
-                      to="/subjects/edit"
+                    <button
+                      @click="() => openEditModal(sub)"
                       class="btn btn-ghost btn-sm btn-circle text-base-content"
                     >
                       <Icon icon="lucide:edit-3" class="w-4 h-4" />
-                    </router-link>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -215,6 +236,34 @@ const prevPage = () => {
         </div>
       </div>
     </div>
+
+    <!-- Edit Modal -->
+    <dialog class="modal font-sans" :class="{ 'modal-open': isEditModalOpen }">
+      <div class="modal-box rounded-[2rem] p-8 shadow-2xl bg-base-100 border border-base-content/5">
+        <h3 class="font-extrabold text-2xl mb-6">Edit Subject Data</h3>
+        <form @submit.prevent="handleUpdate" class="flex flex-col gap-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Subject Name</span></label>
+            <input v-model="editForm.subject_name" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Academic Code</span></label>
+            <input v-model="editForm.academic_code" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Metadata (comma separated)</span></label>
+            <input v-model="metadataInput" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="modal-action mt-6 gap-2">
+            <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="isEditModalOpen = false">Cancel</button>
+            <button type="submit" class="btn btn-primary rounded-xl font-bold px-8 shadow-lg shadow-primary/20">Save Updates</button>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop bg-base-300/60 backdrop-blur-sm">
+        <button @click="isEditModalOpen = false">close</button>
+      </form>
+    </dialog>
 
     <Sidebar />
   </div>

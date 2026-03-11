@@ -30,5 +30,14 @@ export function useTeachers() {
       .map(t => t.name);
   };
 
-  return { teachers, searchTeachers }
+  const updateTeacher = async (id: number, data: any) => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const index = teachers.value.findIndex(t => t.id === id);
+    if (index !== -1) {
+      teachers.value[index] = { ...teachers.value[index], ...data };
+    }
+  };
+
+  return { teachers, searchTeachers, updateTeacher }
 }

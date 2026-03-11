@@ -1,31 +1,40 @@
 import { ref, computed } from 'vue'
+import { useTeachers } from './useTeachers'
+import { useStudents } from './useStudents'
+import { useClasses } from './useClasses'
+import { useSubjects } from './useSubjects'
 
 export function useDashboard() {
-  const stats = ref([
+  const { teachers } = useTeachers()
+  const { students } = useStudents()
+  const { classes } = useClasses()
+  const { subjects } = useSubjects()
+
+  const stats = computed(() => [
     { 
-      label: 'Teachers', 
-      value: '45', 
+      label: 'Total Guru', 
+      value: teachers.value.length.toString(), 
       icon: 'fas fa-user-tie', 
       color: 'text-primary',
       bg: 'bg-primary/10'
     },
     { 
-      label: 'Students', 
-      value: '1,248', 
+      label: 'Total Siswa', 
+      value: students.value.length.toString(), 
       icon: 'fas fa-user-graduate', 
       color: 'text-secondary',
       bg: 'bg-secondary/10'
     },
     { 
-      label: 'Current Classes', 
-      value: '32', 
+      label: 'Kelas Aktif', 
+      value: classes.value.length.toString(), 
       icon: 'fas fa-door-open', 
       color: 'text-accent',
       bg: 'bg-accent/10'
     },
     { 
       label: 'Total Subjects', 
-      value: '18', 
+      value: subjects.value.length.toString(), 
       icon: 'fas fa-book', 
       color: 'text-info',
       bg: 'bg-info/10'

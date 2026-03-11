@@ -2,8 +2,28 @@
 import Sidebar from "@/components/Sidebar.vue";
 import { Icon } from "@iconify/vue";
 import { useSchedules } from "@/composables/useSchedules";
+import { ref } from "vue";
+const { schedules, updateSchedule } = useSchedules();
 
-const { schedules } = useSchedules();
+const isEditModalOpen = ref(false);
+const editForm = ref({
+  id: 0,
+  class_name: "",
+  day: "",
+  period_duration: "",
+  instructor: "",
+  subject: ""
+});
+
+const openEditModal = (sch: any) => {
+  editForm.value = { ...sch };
+  isEditModalOpen.value = true;
+};
+
+const handleUpdate = async () => {
+  await updateSchedule(editForm.value.id, editForm.value);
+  isEditModalOpen.value = false;
+};
 
 const i18n = {
   brand: "SCHOOL",
@@ -96,7 +116,7 @@ const i18n = {
                 class="border-b border-base-content/5 last:border-0 hover:bg-base-content/[0.02] transition-colors"
               >
                 <td class="pl-12 py-10 font-bold text-lg text-base-content/90">
-                  {{ sch.class }}
+                  {{ sch.class_name }}
                 </td>
                 <td class="py-10 font-bold text-lg text-base-content/90">
                   {{ sch.day }}
@@ -105,11 +125,11 @@ const i18n = {
                   <span
                     class="px-5 py-2.5 bg-primary/10 text-primary rounded-xl font-bold text-xs border border-primary/20"
                   >
-                    {{ sch.time }}
+                    {{ sch.period_duration }}
                   </span>
                 </td>
                 <td class="py-10 text-lg font-medium text-base-content/70">
-                  {{ sch.teacher }}
+                  {{ sch.instructor }}
                 </td>
                 <td class="py-10 font-bold text-lg text-[#6366f1]">
                   {{ sch.subject }}
@@ -118,12 +138,12 @@ const i18n = {
                   <div
                     class="flex justify-end opacity-40 hover:opacity-100 transition-opacity"
                   >
-                    <router-link
-                      to="/schedules/edit"
+                    <button
+                      @click="() => openEditModal(sch)"
                       class="btn btn-ghost btn-sm btn-circle text-base-content"
                     >
                       <Icon icon="lucide:edit-3" class="w-4 h-4" />
-                    </router-link>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -132,6 +152,42 @@ const i18n = {
         </div>
       </div>
     </div>
+
+    <!-- Edit Modal -->
+    <dialog class="modal font-sans" :class="{ 'modal-open': isEditModalOpen }">
+      <div class="modal-box rounded-[2rem] p-8 shadow-2xl bg-base-100 border border-base-content/5">
+        <h3 class="font-extrabold text-2xl mb-6">Edit Schedule Data</h3>
+        <form @submit.prevent="handleUpdate" class="flex flex-col gap-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Class</span></label>
+            <input v-model="editForm.class_name" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Day</span></label>
+            <input v-model="editForm.day" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Period Duration</span></label>
+            <input v-model="editForm.period_duration" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Instructor</span></label>
+            <input v-model="editForm.instructor" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Subject</span></label>
+            <input v-model="editForm.subject" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+          </div>
+          <div class="modal-action mt-6 gap-2">
+            <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="isEditModalOpen = false">Cancel</button>
+            <button type="submit" class="btn btn-primary rounded-xl font-bold px-8 shadow-lg shadow-primary/20">Save Updates</button>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop bg-base-300/60 backdrop-blur-sm">
+        <button @click="isEditModalOpen = false">close</button>
+      </form>
+    </dialog>
 
     <!-- Sidebar Component -->
     <Sidebar />

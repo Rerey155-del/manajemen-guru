@@ -25,60 +25,35 @@ const routes = [
         component: () => import('@/pages/teachers/index.vue'),
         meta: { requiresAuth: true }
     },
-    {
-        path: '/teachers/edit',
-        name : 'edit-teacher',
-        component: () => import('@/pages/teachers/edit.vue'),
-        meta: { requiresAuth: true }
-    },
+
     {
         path: '/students',
         name : 'students',
         component: () => import('@/pages/students/index.vue'),
         meta: { requiresAuth: true }
     },
-    {
-        path: '/students/edit',
-        name : 'edit-student',
-        component: () => import('@/pages/students/edit.vue'),
-        meta: { requiresAuth: true }
-    },
+
     {
         path: '/subjects',
         name : 'subjects',
         component: () => import('@/pages/subjects/index.vue'),
         meta: { requiresAuth: true }
     },
-    {
-        path: '/subjects/edit',
-        name : 'edit-subject',
-        component: () => import('@/pages/subjects/edit.vue'),
-        meta: { requiresAuth: true }
-    },
+
     {
         path: '/classes',
         name : 'classes',
         component: () => import('@/pages/classes/index.vue'),
         meta: { requiresAuth: true }
     },
-    {
-        path: '/classes/edit',
-        name : 'edit-class',
-        component: () => import('@/pages/classes/edit.vue'),
-        meta: { requiresAuth: true }
-    },
+
     {
         path: '/schedules',
         name : 'schedules',
         component: () => import('@/pages/schedules/index.vue'),
         meta: { requiresAuth: true }
     },
-    {
-        path: '/schedules/edit',
-        name : 'edit-schedule',
-        component: () => import('@/pages/schedules/edit.vue'),
-        meta: { requiresAuth: true }
-    }
+
 ]
 
 const router = createRouter({
