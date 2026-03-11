@@ -13,11 +13,20 @@ export interface StudentType {
 export const studentService = {
   async getAll(): Promise<StudentType[]> {
     const response = await apiClient.get('/students');
-    return response.data;
+    return response.data.map((s: any) => ({
+      ...s,
+      class_name: s.class_name || '-',
+      enrollment_status: s.enrollment_status || 'Active'
+    }));
   },
   async getById(id: number | string): Promise<StudentType> {
     const response = await apiClient.get(`/students/${id}`);
-    return response.data;
+    const s = response.data;
+    return {
+      ...s,
+      class_name: s.class_name || '-',
+      enrollment_status: s.enrollment_status || 'Active'
+    };
   },
   async create(payload: Omit<StudentType, 'id'>) {
     const response = await apiClient.post('/students', payload);

@@ -1,16 +1,14 @@
 import axios from 'axios';
 
-// Konfigurasi instance Axios untuk base URL API
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // Ganti dengan URL backend sesungguhnya di .env
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   },
-  timeout: 10000 // Timeout request
+  timeout: 10000
 });
 
-// Anda bisa menambahkan interceptor untuk Auth Token di sini:
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');

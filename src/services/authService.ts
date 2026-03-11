@@ -10,20 +10,16 @@ export interface UserType {
 }
 
 export const authService = {
- 
+
   async login(credentials: { username: string; password?: string }): Promise<{ user: UserType, token: string }> {
     try {
-      // Mengambil daftar user dari endpoint /users
+
       const usersResponse = await apiClient.get('/users');
       const users: UserType[] = usersResponse.data;
-      
-      // Mencari user yang cocok dengan username (dan password jika ada validasi password di client)
-      const matchedUser = users.find(u => u.username === credentials.username);
-      
-      if (matchedUser) {
-        // Jika backend kalian menyimpan password, tambahkan validasi:
-        // if (credentials.password && matchedUser.password !== credentials.password) { throw new Error('Password salah'); }
 
+      const matchedUser = users.find(u => u.username === credentials.username);
+
+      if (matchedUser) {
         return {
           user: {
             ...matchedUser,
