@@ -17,11 +17,11 @@ const isSubmitting = ref(false);
 
 const form = ref({
   id: '' as string | number,
-  class_name: "",
+  class_name: "" as any,
   day: "",
   period_duration: "",
-  instructor: "",
-  subject: "",
+  instructor: "" as any,
+  subject: "" as any,
   status: "Active"
 });
 
@@ -55,11 +55,11 @@ onMounted(async () => {
     }
     form.value = { 
       id: detail.id as string | number, 
-      class_name: detail.class_name, 
+      class_name: detail.class_name ? { name: detail.class_name } : '', 
       day: detail.day, 
       period_duration: detail.period_duration, 
-      instructor: detail.instructor, 
-      subject: detail.subject,
+      instructor: detail.instructor ? { name: detail.instructor } : '', 
+      subject: detail.subject ? { name: detail.subject } : '',
       status: detail.status || 'Active'
     };
   } else {
