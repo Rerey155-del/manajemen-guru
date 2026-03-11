@@ -17,7 +17,11 @@ export const authService = {
       const usersResponse = await apiClient.get('/users');
       const users: UserType[] = usersResponse.data;
 
-      const matchedUser = users.find(u => u.username === credentials.username);
+      const matchedUser = users.find(u => {
+        // If the backend has a password field, check it. Otherwise require a default mock password.
+        const dbPassword = (u as any).password || 'admin123';
+        return u.username === credentials.username && credentials.password === dbPassword;
+      });
 
       if (matchedUser) {
         return {
