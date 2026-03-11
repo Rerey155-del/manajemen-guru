@@ -30,7 +30,17 @@ export const studentService = {
   },
   async create(payload: Omit<StudentType, 'id'>) {
     const response = await apiClient.post('/students', payload);
-    return response.data;
+    const createdItem = response.data;
+    
+    // Backend ignores enrollment_status and class_name on POST, so we follow up with PUT
+    const putResponse = await apiClient.put(`/students/${createdItem.id}`, payload);
+    const s = putResponse.data || { ...createdItem, ...payload };
+    
+    return {
+      ...s,
+      class_name: s.class_name || '-',
+      enrollment_status: s.enrollment_status || 'Active'
+    };
   },
   async update(id: number | string, payload: Partial<StudentType>) {
     const response = await apiClient.put(`/students/${id}`, payload);

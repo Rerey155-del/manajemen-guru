@@ -14,7 +14,7 @@ const form = ref({
   subject_name: "",
   academic_code: "",
   metadata: [] as string[],
-  status: "Active"
+  
 });
 const metadataInput = ref("");
 
@@ -88,13 +88,7 @@ const i18n = {
             <label class="label"><span class="label-text font-bold">Metadata (comma separated)</span></label>
             <input v-model="metadataInput" type="text" class="input input-bordered focus:border-primary rounded-xl" placeholder="Core, Science, Grade 10" />
           </div>
-          <div class="form-control">
-            <label class="label"><span class="label-text font-bold">Status</span></label>
-            <select v-model="form.status" class="select select-bordered focus:border-primary rounded-xl" required>
-              <option value="Active">Active</option>
-              <option value="Non-Active">Non-Active</option>
-            </select>
-          </div>
+        
           <div class="form-actions mt-6 flex justify-end gap-3">
             <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="goBack" :disabled="isSubmitting">Cancel</button>
             <button type="submit" class="btn btn-primary rounded-xl font-bold px-8 shadow-lg shadow-primary/20" :disabled="isSubmitting">

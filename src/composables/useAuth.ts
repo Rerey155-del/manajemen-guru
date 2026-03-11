@@ -1,33 +1,15 @@
-import { ref, computed } from 'vue'
-import { authService, type UserType } from '@/services/authService'
-
-const user = ref<UserType | null>(JSON.parse(localStorage.getItem('user') || 'null'))
+import { computed } from 'vue'
+import { useAuthStore } from '@/stores/useAuthStore'
 
 export function useAuth() {
-  const isAuthenticated = computed(() => !!user.value)
-
-  const login = async (credentials: { username: string; password?: string }) => {
-    try {
-      const response = await authService.login(credentials);
-      user.value = response.user;
-      localStorage.setItem('user', JSON.stringify(response.user));
-      localStorage.setItem('token', response.token);
-      return true;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
-  }
-
-  const logout = () => {
-    user.value = null
-    localStorage.removeItem('user')
-  }
+  const store = useAuthStore()
 
   return {
-    user,
-    isAuthenticated,
-    login,
-    logout
+    user: computed(() => store.user),
+    isAuthenticated: computed(() => store.isAuthenticated),
+    login: store.login,
+    logout: store.logout,
+    loading: computed(() => store.loading),
+    error: computed(() => store.error)
   }
 }

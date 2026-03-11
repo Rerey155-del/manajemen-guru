@@ -177,14 +177,6 @@ const prevPage = () => {
                     >
                       <Icon icon="lucide:edit-3" class="w-4 h-4" />
                     </button>
-                    <!-- Status Toggle Switch -->
-                    <input 
-                      type="checkbox" 
-                      class="toggle toggle-sm toggle-success" 
-                      :checked="isStatusActive(sub.status)" 
-                      @change="handleStatusToggle(sub.id || 0, sub.status)"
-                      title="Toggle Status"
-                    />
                   </div>
                 </td>
               </tr>
