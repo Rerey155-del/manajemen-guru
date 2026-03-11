@@ -247,9 +247,4 @@ const i18n = {
     transform: scale(1);
   }
 }
-
-/* Custom progress bar shadows */
-.progress::-webkit-progress-value {
-  @apply shadow-lg;
-}
 </style>
