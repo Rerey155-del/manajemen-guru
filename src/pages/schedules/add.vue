@@ -4,6 +4,10 @@ import { Icon } from "@iconify/vue";
 import { useScheduleStore } from "@/stores/useScheduleStore";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import AutoComplete from "primevue/autocomplete";
+import { classService, type ClassAutocompleteOption } from "@/services/classService";
+import { teacherService, type TeacherAutocompleteOption } from "@/services/teacherService";
+import { subjectService, type SubjectAutocompleteOption } from "@/services/subjectService";
 
 const store = useScheduleStore();
 const router = useRouter();
@@ -19,6 +23,22 @@ const form = ref({
   status: "Active"
 });
 
+// Autocomplete Logic
+const filteredClasses = ref<ClassAutocompleteOption[]>([]);
+const searchClass = async (event: any) => {
+  filteredClasses.value = await classService.autocompleteClasses(event.query);
+};
+
+const filteredTeachers = ref<TeacherAutocompleteOption[]>([]);
+const searchTeacher = async (event: any) => {
+  filteredTeachers.value = await teacherService.autocompleteTeachers(event.query);
+};
+
+const filteredSubjects = ref<SubjectAutocompleteOption[]>([]);
+const searchSubject = async (event: any) => {
+  filteredSubjects.value = await subjectService.autocompleteSubjects(event.query);
+};
+
 const goBack = () => {
   router.push('/schedules');
 };
@@ -26,7 +46,13 @@ const goBack = () => {
 const handleSubmit = async () => {
   try {
     isSubmitting.value = true;
-    await store.createItem(form.value);
+    const finalPayload = {
+      ...form.value,
+      class_name: typeof form.value.class_name === 'object' ? (form.value.class_name as any).name : form.value.class_name,
+      instructor: typeof form.value.instructor === 'object' ? (form.value.instructor as any).name : form.value.instructor,
+      subject: typeof form.value.subject === 'object' ? (form.value.subject as any).name : form.value.subject,
+    };
+    await store.createItem(finalPayload);
     router.push('/schedules');
   } catch (error: any) {
     alert(error.message || 'An error occurred');
@@ -72,9 +98,19 @@ const i18n = {
 
       <div class="bg-base-100 backdrop-blur-xl shadow-2xl border border-base-content/5 rounded-[2.5rem] p-8 max-w-3xl" data-aos="fade-up">
         <form @submit.prevent="handleSubmit" class="flex flex-col gap-5">
-          <div class="form-control">
+          <div class="form-control flex flex-col pt-1">
             <label class="label"><span class="label-text font-bold">Class / Group</span></label>
-            <input v-model="form.class_name" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="Grade 10A" />
+            <AutoComplete 
+              v-model="form.class_name" 
+              :suggestions="filteredClasses" 
+              @complete="searchClass" 
+              optionLabel="name" 
+              placeholder="Search Class (e.g., Grade 10A)"
+              :delay="300"
+              class="w-full"
+              inputClass="input input-bordered focus:border-primary rounded-xl w-full"
+              panelClass="bg-base-100 border shadow-xl rounded-xl mt-1 z-50 text-sm menu p-2"
+            />
           </div>
           <div class="form-control">
             <label class="label"><span class="label-text font-bold">Day</span></label>
@@ -84,13 +120,33 @@ const i18n = {
             <label class="label"><span class="label-text font-bold">Period / Duration</span></label>
             <input v-model="form.period_duration" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="08:00 - 09:30" />
           </div>
-          <div class="form-control">
+          <div class="form-control flex flex-col pt-1">
             <label class="label"><span class="label-text font-bold">Instructor Name</span></label>
-            <input v-model="form.instructor" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="Mr. Wilson" />
+            <AutoComplete 
+              v-model="form.instructor" 
+              :suggestions="filteredTeachers" 
+              @complete="searchTeacher" 
+              optionLabel="name" 
+              placeholder="Search Instructor (e.g., Mr. Wilson)"
+              :delay="300"
+              class="w-full"
+              inputClass="input input-bordered focus:border-primary rounded-xl w-full"
+              panelClass="bg-base-100 border shadow-xl rounded-xl mt-1 z-50 text-sm menu p-2"
+            />
           </div>
-          <div class="form-control">
+          <div class="form-control flex flex-col pt-1">
             <label class="label"><span class="label-text font-bold">Subject</span></label>
-            <input v-model="form.subject" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="Mathematics" />
+            <AutoComplete 
+              v-model="form.subject" 
+              :suggestions="filteredSubjects" 
+              @complete="searchSubject" 
+              optionLabel="name" 
+              placeholder="Search Subject (e.g., Mathematics)"
+              :delay="300"
+              class="w-full"
+              inputClass="input input-bordered focus:border-primary rounded-xl w-full"
+              panelClass="bg-base-100 border shadow-xl rounded-xl mt-1 z-50 text-sm menu p-2"
+            />
           </div>
           <div class="form-control">
             <label class="label"><span class="label-text font-bold">Status</span></label>

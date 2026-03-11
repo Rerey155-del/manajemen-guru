@@ -1,5 +1,10 @@
 import apiClient from './apiClient';
 
+export interface TeacherAutocompleteOption {
+  id: string | number;
+  name: string;
+}
+
 export interface TeacherType {
   id?: number | string;
   name: string;
@@ -32,5 +37,11 @@ export const teacherService = {
     const updated = { ...current, [statusField]: newValue };
     const response = await apiClient.put(`/teachers/${id}`, updated);
     return response.data || updated;
+  },
+  async autocompleteTeachers(query: string): Promise<TeacherAutocompleteOption[]> {
+    const data = await this.getAll();
+    return data
+      .filter(t => t.name.toLowerCase().includes(query.toLowerCase()))
+      .map(t => ({ id: t.id!, name: t.name }));
   }
 };
