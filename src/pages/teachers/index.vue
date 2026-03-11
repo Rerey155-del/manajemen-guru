@@ -1,38 +1,23 @@
 <script setup lang="ts">
 import Sidebar from "@/components/Sidebar.vue";
 import { Icon } from "@iconify/vue";
-import { useTeachers } from "@/composables/useTeachers";
-import { ref, computed } from "vue";
-import { teacherService, type CreateTeacherPayload } from "@/services/teacherService";
+import { useTeacherStore } from "@/stores/useTeacherStore";
+import { ref, computed, onMounted } from "vue";
 import { subjectService, type SubjectAutocompleteOption } from "@/services/subjectService";
 import AutoComplete from "primevue/autocomplete";
 
-const { teachers, updateTeacher } = useTeachers();
+const store = useTeacherStore();
 
-const isEditModalOpen = ref(false);
-const editForm = ref({
-  id: 0,
-  name: "",
-  nip: "",
-  email: "",
-  department: "",
-  status: "Active"
+onMounted(() => {
+  store.fetchList();
 });
 
-const openEditModal = (teacher: any) => {
-  editForm.value = { ...teacher };
-  isEditModalOpen.value = true;
-};
-
-const handleUpdate = async () => {
-  await updateTeacher(editForm.value.id, editForm.value);
-  isEditModalOpen.value = false;
-};
-
-// --- Add Teacher Logic ---
-const isAddModalOpen = ref(false);
+const currentView = ref<'list' | 'form'>('list');
+const isEditMode = ref(false);
 const isSubmitting = ref(false);
-const addForm = ref<CreateTeacherPayload>({
+
+const form = ref({
+  id: '' as string | number,
   name: "",
   nip: "",
   email: "",
@@ -47,31 +32,66 @@ const searchDepartment = async (event: any) => {
   filteredDepartments.value = await subjectService.autocompleteSubjects(query);
 };
 
-const handleAddTeacher = async () => {
+const openAddForm = () => {
+  isEditMode.value = false;
+  form.value = { id: '', name: "", nip: "", email: "", department: "", status: "Active" };
+  currentView.value = 'form';
+};
+
+const openEditForm = async (id: number | string) => {
+  isEditMode.value = true;
+  currentView.value = 'form';
+  const detail = await store.fetchDetail(id);
+  if (detail) {
+    form.value = { 
+      id: detail.id as string | number, 
+      name: detail.name, 
+      nip: detail.nip, 
+      email: detail.email, 
+      department: detail.department, 
+      status: detail.status 
+    };
+  }
+};
+
+const goBack = () => {
+  currentView.value = 'list';
+};
+
+const handleSubmit = async () => {
   try {
     isSubmitting.value = true;
-    
-    // Konversi object autocomplete ke string department atau ID relasi jika diperlukan
-    const finalPayload: CreateTeacherPayload = {
-      ...addForm.value,
-      department: typeof addForm.value.department === 'object' 
-          ? (addForm.value.department as any).name 
-          : addForm.value.department
+    const finalPayload = {
+      ...form.value,
+      department: typeof form.value.department === 'object' 
+          ? (form.value.department as any).name 
+          : form.value.department
     };
 
-    const newTeacherResponse = await teacherService.createTeacher(finalPayload);
-    console.log("Teacher created successfully:", newTeacherResponse);
+    if (isEditMode.value) {
+      const { id, ...putPayload } = finalPayload;
+      await store.updateItem(id, putPayload);
+    } else {
+      const { id, ...postPayload } = finalPayload;
+      await store.createItem(postPayload);
+    }
     
-    // Idealnya update `teachers` global state disini jika API mengembalikan data insert utuh
-    // teachers.value.push(newTeacherResponse.data);
-
-    isAddModalOpen.value = false;
-    // Reset Form
-    addForm.value = { name: "", nip: "", email: "", department: "", status: "Active" };
+    // Refresh list and return
+    await store.fetchList();
+    goBack();
   } catch (error: any) {
-    alert(error.message);
+    alert(error.message || 'An error occurred');
   } finally {
     isSubmitting.value = false;
+  }
+};
+
+const handleStatusToggle = async (id: number | string, currentStatus: string) => {
+  const newStatus = currentStatus === 'Active' ? 'Non-Aktif' : 'Active';
+  try {
+    await store.toggleItemStatus(id, 'status', newStatus);
+  } catch (err: any) {
+    alert('Failed to toggle status: ' + (err.message || ''));
   }
 };
 
@@ -84,7 +104,8 @@ const i18n = {
   },
   actions: {
     search: "Search by name...",
-    add: "Add New Teacher"
+    add: "Add New Teacher",
+    back: "Back to List"
   },
   table: {
     identity: "Teacher Identity",
@@ -109,7 +130,7 @@ const currentPage = ref(1);
 const itemsPerPage = 5;
 
 const filteredTeachers = computed(() => {
-  return teachers.value.filter((t) =>
+  return store.items.filter((t) =>
     t.name.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
@@ -156,44 +177,58 @@ const prevPage = () => {
       >
         <div>
           <h1 class="text-4xl font-extrabold tracking-tight text-base-content mb-2">
-            {{ i18n.header.title }}
+            {{ currentView === 'list' ? i18n.header.title : (isEditMode ? 'Edit Teacher' : 'Add Teacher') }}
           </h1>
           <p class="text-base-content/40 font-medium">
-            {{ i18n.header.subtitle }}
+            {{ currentView === 'list' ? i18n.header.subtitle : 'Fill out the form below.' }}
           </p>
         </div>
         <div class="flex items-center gap-3">
-          <!-- Search Bar -->
-          <div class="relative group">
-            <Icon
-              icon="lucide:search"
-              class="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/20 group-focus-within:text-primary transition-colors"
-            />
-            <input
-              v-model="searchQuery"
-              @input="currentPage = 1"
-              type="text"
-              :placeholder="i18n.actions.search"
-              class="input bg-base-100 border-base-content/5 rounded-xl pl-12 w-64 focus:border-primary/50 text-base-content font-medium"
-            />
-          </div>
-          <button
-            @click="isAddModalOpen = true"
-            class="btn btn-primary rounded-xl px-6 font-bold gap-2 shadow-lg shadow-primary/20 capitalize"
-          >
-            <Icon icon="lucide:user-plus" class="text-sm" />
-            {{ i18n.actions.add }}
-          </button>
+          <template v-if="currentView === 'list'">
+            <!-- Search Bar -->
+            <div class="relative group">
+              <Icon
+                icon="lucide:search"
+                class="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/20 group-focus-within:text-primary transition-colors"
+              />
+              <input
+                v-model="searchQuery"
+                @input="currentPage = 1"
+                type="text"
+                :placeholder="i18n.actions.search"
+                class="input bg-base-100 border-base-content/5 rounded-xl pl-12 w-64 focus:border-primary/50 text-base-content font-medium"
+              />
+            </div>
+            <button
+              @click="openAddForm"
+              class="btn btn-primary rounded-xl px-6 font-bold gap-2 shadow-lg shadow-primary/20 capitalize"
+            >
+              <Icon icon="lucide:user-plus" class="text-sm" />
+              {{ i18n.actions.add }}
+            </button>
+          </template>
+          <template v-else>
+            <button
+              @click="goBack"
+              class="btn btn-ghost rounded-xl px-6 font-bold gap-2 capitalize"
+            >
+              <Icon icon="lucide:arrow-left" class="text-sm" />
+              {{ i18n.actions.back }}
+            </button>
+          </template>
         </div>
       </header>
 
-      <!-- Teachers Table -->
-      <div
+      <!-- Main Content Area -->
+      <div v-if="currentView === 'list'"
         class="bg-base-100 backdrop-blur-xl shadow-2xl border border-base-content/5 rounded-[2.5rem] overflow-hidden flex flex-col"
         data-aos="fade-right"
         data-aos-delay="200"
       >
-        <div class="overflow-x-auto">
+        <div v-if="store.loadingList" class="p-10 flex justify-center">
+          <span class="loading loading-spinner text-primary loading-lg"></span>
+        </div>
+        <div v-else class="overflow-x-auto">
           <table class="table table-lg w-full">
             <thead>
               <tr
@@ -253,15 +288,22 @@ const prevPage = () => {
                   </span>
                 </td>
                 <td class="pr-12 py-10 text-right">
-                  <div
-                    class="flex justify-end opacity-40 hover:opacity-100 transition-opacity"
-                  >
+                  <div class="flex justify-end items-center gap-3">
                     <button
-                      @click="() => openEditModal(teacher)"
-                      class="btn btn-ghost btn-sm btn-circle text-base-content"
+                      @click="() => openEditForm(teacher.id!)"
+                      class="btn btn-ghost btn-sm btn-circle text-base-content opacity-40 hover:opacity-100 transition-opacity"
+                      title="Edit Teacher"
                     >
                       <Icon icon="lucide:edit-3" class="w-4 h-4" />
                     </button>
+                    <!-- Status Toggle Switch -->
+                    <input 
+                      type="checkbox" 
+                      class="toggle toggle-sm toggle-success" 
+                      :checked="teacher.status === 'Active'" 
+                      @change="handleStatusToggle(teacher.id!, teacher.status)"
+                      title="Toggle Status"
+                    />
                   </div>
                 </td>
               </tr>
@@ -279,7 +321,7 @@ const prevPage = () => {
         </div>
 
         <!-- Pagination Controls -->
-        <div
+        <div v-if="!store.loadingList && store.items.length > 0"
           class="p-6 border-t border-base-content/5 flex items-center justify-between bg-base-content/5"
         >
           <span class="text-base-content/20 text-sm font-bold"
@@ -309,29 +351,40 @@ const prevPage = () => {
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Add Modal -->
-    <dialog v-if="isAddModalOpen" class="modal font-sans" :class="{ 'modal-open': isAddModalOpen }">
-      <div class="modal-box rounded-[2rem] p-8 shadow-2xl bg-base-100 border border-base-content/5 overflow-visible">
-        <h3 class="font-extrabold text-2xl mb-6">Add New Teacher</h3>
-        <form @submit.prevent="handleAddTeacher" class="flex flex-col gap-4">
+      <!-- In-Page Form View -->
+      <div v-else-if="currentView === 'form'"
+        class="bg-base-100 backdrop-blur-xl shadow-2xl border border-base-content/5 rounded-[2.5rem] p-8 max-w-3xl"
+        data-aos="fade-up"
+      >
+        <!-- Skeleton Loader for Edit Flow -->
+        <div v-if="store.loadingDetail" class="animate-pulse space-y-6">
+          <div class="h-10 bg-base-200 rounded w-1/4"></div>
+          <div class="h-12 bg-base-200 rounded-xl w-full"></div>
+          <div class="h-12 bg-base-200 rounded-xl w-full"></div>
+          <div class="h-12 bg-base-200 rounded-xl w-full"></div>
+          <div class="h-12 bg-base-200 rounded-xl w-full"></div>
+          <div class="h-12 bg-base-200 rounded-xl w-1/2"></div>
+          <div class="h-12 bg-base-200 rounded-xl w-full mt-8"></div>
+        </div>
+        
+        <form v-else @submit.prevent="handleSubmit" class="flex flex-col gap-5">
           <div class="form-control">
             <label class="label"><span class="label-text font-bold">Name</span></label>
-            <input v-model="addForm.name" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="John Doe" />
+            <input v-model="form.name" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="John Doe" />
           </div>
           <div class="form-control">
             <label class="label"><span class="label-text font-bold">NIP / NIK</span></label>
-            <input v-model="addForm.nip" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="1987xxxxxxx" />
+            <input v-model="form.nip" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="1987xxxxxxx" />
           </div>
           <div class="form-control">
             <label class="label"><span class="label-text font-bold">Email</span></label>
-            <input v-model="addForm.email" type="email" class="input input-bordered focus:border-primary rounded-xl" required placeholder="john.doe@school.edu" />
+            <input v-model="form.email" type="email" class="input input-bordered focus:border-primary rounded-xl" required placeholder="john.doe@school.edu" />
           </div>
           <div class="form-control flex flex-col pt-1">
             <label class="label"><span class="label-text font-bold">Department (Subject)</span></label>
             <AutoComplete 
-              v-model="addForm.department" 
+              v-model="form.department" 
               :suggestions="filteredDepartments" 
               @complete="searchDepartment" 
               optionLabel="name" 
@@ -344,66 +397,23 @@ const prevPage = () => {
           </div>
           <div class="form-control">
             <label class="label"><span class="label-text font-bold">Status</span></label>
-            <select v-model="addForm.status" class="select select-bordered focus:border-primary rounded-xl" required>
+            <select v-model="form.status" class="select select-bordered focus:border-primary rounded-xl" required>
               <option value="Active">Active</option>
               <option value="Suspended">Suspended</option>
               <option value="Non-Aktif">Non-Aktif</option>
             </select>
           </div>
-          <div class="modal-action mt-6 gap-2">
-            <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="isAddModalOpen = false" :disabled="isSubmitting">Cancel</button>
+          <div class="form-actions mt-6 flex justify-end gap-3">
+            <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="goBack" :disabled="isSubmitting">Cancel</button>
             <button type="submit" class="btn btn-primary rounded-xl font-bold px-8 shadow-lg shadow-primary/20" :disabled="isSubmitting">
               <span v-if="isSubmitting" class="loading loading-spinner loading-sm"></span>
-              Create Teacher
+              {{ isEditMode ? 'Save Updates' : 'Create Teacher' }}
             </button>
           </div>
         </form>
       </div>
-      <form method="dialog" class="modal-backdrop bg-base-300/60 backdrop-blur-sm">
-        <button @click="isAddModalOpen = false" :disabled="isSubmitting">close</button>
-      </form>
-    </dialog>
 
-    <!-- Edit Modal -->
-    <dialog v-if="isEditModalOpen" class="modal font-sans" :class="{ 'modal-open': isEditModalOpen }">
-      <div class="modal-box rounded-[2rem] p-8 shadow-2xl bg-base-100 border border-base-content/5">
-        <h3 class="font-extrabold text-2xl mb-6">Edit Teacher Data</h3>
-        <form @submit.prevent="handleUpdate" class="flex flex-col gap-4">
-          <div class="form-control">
-            <label class="label"><span class="label-text font-bold">Name</span></label>
-            <input v-model="editForm.name" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
-          </div>
-          <div class="form-control">
-            <label class="label"><span class="label-text font-bold">NIP / NIK</span></label>
-            <input v-model="editForm.nip" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
-          </div>
-          <div class="form-control">
-            <label class="label"><span class="label-text font-bold">Email</span></label>
-            <input v-model="editForm.email" type="email" class="input input-bordered focus:border-primary rounded-xl" required />
-          </div>
-          <div class="form-control">
-            <label class="label"><span class="label-text font-bold">Department</span></label>
-            <input v-model="editForm.department" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
-          </div>
-          <div class="form-control">
-            <label class="label"><span class="label-text font-bold">Status</span></label>
-            <select v-model="editForm.status" class="select select-bordered focus:border-primary rounded-xl" required>
-              <option value="Active">Active</option>
-              <option value="Suspended">Suspended</option>
-              <option value="Non-Aktif">Non-Aktif</option>
-            </select>
-          </div>
-          <div class="modal-action mt-6 gap-2">
-            <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="isEditModalOpen = false">Cancel</button>
-            <button type="submit" class="btn btn-primary rounded-xl font-bold px-8 shadow-lg shadow-primary/20">Save Updates</button>
-          </div>
-        </form>
-      </div>
-      <form method="dialog" class="modal-backdrop bg-base-300/60 backdrop-blur-sm">
-        <button @click="isEditModalOpen = false">close</button>
-      </form>
-    </dialog>
-
+    </div>
     <Sidebar />
   </div>
 </template>

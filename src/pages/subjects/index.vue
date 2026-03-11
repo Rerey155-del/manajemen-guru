@@ -1,30 +1,87 @@
 <script setup lang="ts">
 import Sidebar from "@/components/Sidebar.vue";
 import { Icon } from "@iconify/vue";
-import { useSubjects } from "@/composables/useSubjects";
-import { ref, computed } from "vue";
+import { useSubjectStore } from "@/stores/useSubjectStore";
+import { ref, computed, onMounted } from "vue";
 
-const { subjects, updateSubject } = useSubjects();
+const store = useSubjectStore();
 
-const isEditModalOpen = ref(false);
-const editForm = ref({
-  id: 0,
+onMounted(() => {
+  store.fetchList();
+});
+
+const currentView = ref<'list' | 'form'>('list');
+const isEditMode = ref(false);
+const isSubmitting = ref(false);
+
+const form = ref({
+  id: '' as string | number,
   subject_name: "",
   academic_code: "",
-  metadata: [] as string[]
+  metadata: [] as string[],
+  status: "Active"
 });
 const metadataInput = ref("");
 
-const openEditModal = (subject: any) => {
-  editForm.value = { ...subject };
-  metadataInput.value = subject.metadata ? subject.metadata.join(", ") : "";
-  isEditModalOpen.value = true;
+const openAddForm = () => {
+  isEditMode.value = false;
+  form.value = { id: '', subject_name: "", academic_code: "", metadata: [], status: "Active" };
+  metadataInput.value = "";
+  currentView.value = 'form';
 };
 
-const handleUpdate = async () => {
-  editForm.value.metadata = metadataInput.value.split(",").map((t: string) => t.trim()).filter(Boolean);
-  await updateSubject(editForm.value.id, editForm.value);
-  isEditModalOpen.value = false;
+const openEditForm = async (id: number | string) => {
+  isEditMode.value = true;
+  currentView.value = 'form';
+  const detail = await store.fetchDetail(id);
+  if (detail) {
+    form.value = { 
+      id: detail.id as string | number, 
+      subject_name: detail.subject_name, 
+      academic_code: detail.academic_code, 
+      metadata: Array.isArray(detail.metadata) ? detail.metadata : [],
+      status: detail.status || 'Active'
+    };
+    metadataInput.value = Array.isArray(detail.metadata) ? detail.metadata.join(", ") : "";
+  }
+};
+
+const goBack = () => {
+  currentView.value = 'list';
+};
+
+const handleSubmit = async () => {
+  try {
+    isSubmitting.value = true;
+    const finalPayload = {
+      ...form.value,
+      metadata: metadataInput.value.split(",").map(t => t.trim()).filter(Boolean)
+    };
+
+    if (isEditMode.value) {
+      const { id, ...putPayload } = finalPayload;
+      await store.updateItem(id, putPayload);
+    } else {
+      const { id, ...postPayload } = finalPayload;
+      await store.createItem(postPayload);
+    }
+    
+    await store.fetchList();
+    goBack();
+  } catch (error: any) {
+    alert(error.message || 'An error occurred');
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+const handleStatusToggle = async (id: number | string, currentStatus: string | undefined) => {
+  const newStatus = currentStatus === 'Active' ? 'Non-Aktif' : 'Active';
+  try {
+    await store.toggleItemStatus(id, 'status', newStatus);
+  } catch (err: any) {
+    alert('Failed to toggle status: ' + (err.message || ''));
+  }
 };
 
 const i18n = {
@@ -36,12 +93,14 @@ const i18n = {
   },
   actions: {
     search: "Search by name...",
-    add: "Define New Subject"
+    add: "Define New Subject",
+    back: "Back to List"
   },
   table: {
     name: "Subject Name",
     code: "Academic Code",
     metadata: "Metadata",
+    status: "Status",
     actions: "Actions",
     noResults: "No results found for"
   },
@@ -59,7 +118,7 @@ const currentPage = ref(1);
 const itemsPerPage = 5;
 
 const filteredSubjects = computed(() => {
-  return subjects.value.filter((s) =>
+  return store.items.filter((s) =>
     s.subject_name.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
@@ -88,69 +147,73 @@ const prevPage = () => {
 
     <div class="drawer-content flex flex-col p-6 lg:p-10">
       <!-- Mobile Navbar Toggle -->
-      <div
-        class="flex items-center justify-between lg:hidden mb-6 bg-base-100 p-4 rounded-2xl shadow-sm"
-      >
+      <div class="flex items-center justify-between lg:hidden mb-6 bg-base-100 p-4 rounded-2xl shadow-sm">
         <label for="my-drawer-2" class="btn btn-ghost btn-circle drawer-button">
           <Icon icon="lucide:menu" class="text-xl" />
         </label>
-        <span class="text-xl font-bold tracking-tight"
-          >{{ i18n.brand }}<span class="text-primary">{{ i18n.version }}</span></span
-        >
+        <span class="text-xl font-bold tracking-tight">{{ i18n.brand }}<span class="text-primary">{{ i18n.version }}</span></span>
       </div>
 
       <!-- Header Section -->
-      <header
-        class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10"
-        data-aos="fade-down"
-      >
+      <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10" data-aos="fade-down">
         <div>
           <h1 class="text-4xl font-extrabold tracking-tight text-base-content mb-2">
-            {{ i18n.header.title }}
+            {{ currentView === 'list' ? i18n.header.title : (isEditMode ? 'Edit Subject' : 'Define New Subject') }}
           </h1>
           <p class="text-base-content/40 font-medium">
-            {{ i18n.header.subtitle }}
+            {{ currentView === 'list' ? i18n.header.subtitle : 'Configure subject parameters.' }}
           </p>
         </div>
         <div class="flex items-center gap-3">
-          <!-- Search Bar -->
-          <div class="relative group">
-            <Icon
-              icon="lucide:search"
-              class="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/20 group-focus-within:text-primary transition-colors"
-            />
-            <input
-              v-model="searchQuery"
-              @input="currentPage = 1"
-              type="text"
-              :placeholder="i18n.actions.search"
-              class="input bg-base-100 border-base-content/5 rounded-xl pl-12 w-64 focus:border-primary/50 text-base-content font-medium"
-            />
-          </div>
-          <button
-            class="btn btn-primary rounded-xl px-6 font-bold gap-2 shadow-lg shadow-primary/20 capitalize"
-          >
-            <Icon icon="lucide:plus" class="text-sm" />
-            {{ i18n.actions.add }}
-          </button>
+          <template v-if="currentView === 'list'">
+            <!-- Search Bar -->
+            <div class="relative group">
+              <Icon icon="lucide:search" class="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/20 group-focus-within:text-primary transition-colors" />
+              <input
+                v-model="searchQuery"
+                @input="currentPage = 1"
+                type="text"
+                :placeholder="i18n.actions.search"
+                class="input bg-base-100 border-base-content/5 rounded-xl pl-12 w-64 focus:border-primary/50 text-base-content font-medium"
+              />
+            </div>
+            <button
+              @click="openAddForm"
+              class="btn btn-primary rounded-xl px-6 font-bold gap-2 shadow-lg shadow-primary/20 capitalize"
+            >
+              <Icon icon="lucide:plus" class="text-sm" />
+              {{ i18n.actions.add }}
+            </button>
+          </template>
+          <template v-else>
+            <button
+              @click="goBack"
+              class="btn btn-ghost rounded-xl px-6 font-bold gap-2 capitalize"
+            >
+              <Icon icon="lucide:arrow-left" class="text-sm" />
+              {{ i18n.actions.back }}
+            </button>
+          </template>
         </div>
       </header>
 
-      <!-- Subjects Table -->
-      <div
+      <!-- Main Content Area -->
+      <div v-if="currentView === 'list'"
         class="bg-base-100 backdrop-blur-xl shadow-2xl border border-base-content/5 rounded-[2.5rem] overflow-hidden flex flex-col"
         data-aos="fade-right"
         data-aos-delay="200"
       >
-        <div class="overflow-x-auto">
+        <div v-if="store.loadingList" class="p-10 flex justify-center">
+          <span class="loading loading-spinner text-primary loading-lg"></span>
+        </div>
+        <div v-else class="overflow-x-auto">
           <table class="table table-lg w-full">
             <thead>
-              <tr
-                class="text-base-content/30 font-bold uppercase tracking-widest text-[10px] border-b border-base-content/5"
-              >
+              <tr class="text-base-content/30 font-bold uppercase tracking-widest text-[10px] border-b border-base-content/5">
                 <th class="pl-12 py-8">{{ i18n.table.name }}</th>
                 <th class="py-8">{{ i18n.table.code }}</th>
                 <th class="py-8">{{ i18n.table.metadata }}</th>
+                <th class="py-8 text-center">{{ i18n.table.status }}</th>
                 <th class="pr-12 py-8 text-right">{{ i18n.table.actions }}</th>
               </tr>
             </thead>
@@ -163,40 +226,55 @@ const prevPage = () => {
                 <td class="pl-12 py-10 font-bold text-lg text-primary">
                   {{ sub.subject_name }}
                 </td>
-                <td
-                  class="py-10 font-bold text-lg text-base-content/40 font-mono tracking-tighter"
-                >
+                <td class="py-10 font-bold text-lg text-base-content/40 font-mono tracking-tighter">
                   {{ sub.academic_code }}
                 </td>
                 <td class="py-10">
-                  <div class="flex gap-2">
+                  <div class="flex flex-wrap gap-2 max-w-xs">
+                    <span v-if="!sub.metadata || !sub.metadata.length" class="text-xs text-base-content/30 italic">No Metadata</span>
                     <span
+                      v-else
                       v-for="tag in sub.metadata"
                       :key="tag"
-                      class="px-4 py-1.5 bg-base-content/5 text-base-content/40 rounded-lg text-[10px] font-bold border border-base-content/5"
+                      class="px-4 py-1.5 bg-base-content/5 text-base-content/60 rounded-lg text-[10px] font-bold border border-base-content/5"
                     >
                       {{ tag }}
                     </span>
                   </div>
                 </td>
-                <td class="pr-12 py-10 text-right">
-                  <div
-                    class="flex justify-end opacity-40 hover:opacity-100 transition-opacity"
+                <td class="py-10 text-center">
+                  <span
+                    :class="`badge badge-sm font-black uppercase text-[10px] p-2 h-auto ${
+                      (sub.status || 'Active') === 'Active'
+                        ? 'badge-success shadow-lg shadow-success/20'
+                        : 'badge-ghost opacity-40'
+                    }`"
                   >
+                    {{ sub.status || 'Active' }}
+                  </span>
+                </td>
+                <td class="pr-12 py-10 text-right">
+                  <div class="flex justify-end items-center gap-3">
                     <button
-                      @click="() => openEditModal(sub)"
-                      class="btn btn-ghost btn-sm btn-circle text-base-content"
+                      @click="() => openEditForm(sub.id!)"
+                      class="btn btn-ghost btn-sm btn-circle text-base-content opacity-40 hover:opacity-100 transition-opacity"
+                      title="Edit Subject"
                     >
                       <Icon icon="lucide:edit-3" class="w-4 h-4" />
                     </button>
+                    <!-- Status Toggle Switch -->
+                    <input 
+                      type="checkbox" 
+                      class="toggle toggle-sm toggle-success" 
+                      :checked="(sub.status || 'Active') === 'Active'" 
+                      @change="handleStatusToggle(sub.id!, sub.status || 'Active')"
+                      title="Toggle Status"
+                    />
                   </div>
                 </td>
               </tr>
               <tr v-if="paginatedSubjects.length === 0">
-                <td
-                  colspan="4"
-                  class="py-20 text-center text-base-content/20 font-bold italic"
-                >
+                <td colspan="5" class="py-20 text-center text-base-content/20 font-bold italic">
                   {{ i18n.table.noResults }} "{{ searchQuery }}"
                 </td>
               </tr>
@@ -205,65 +283,67 @@ const prevPage = () => {
         </div>
 
         <!-- Pagination Controls -->
-        <div
-          class="p-6 border-t border-base-content/5 flex items-center justify-between bg-base-content/5"
-        >
-          <span class="text-base-content/20 text-sm font-bold"
-            >{{ i18n.pagination.showing }} {{ paginatedSubjects.length }} {{ i18n.pagination.of }}
-            {{ filteredSubjects.length }} {{ i18n.pagination.subjects }}</span
-          >
+        <div v-if="!store.loadingList && store.items.length > 0" class="p-6 border-t border-base-content/5 flex items-center justify-between bg-base-content/5">
+          <span class="text-base-content/20 text-sm font-bold">
+            {{ i18n.pagination.showing }} {{ paginatedSubjects.length }} {{ i18n.pagination.of }}
+            {{ filteredSubjects.length }} {{ i18n.pagination.subjects }}
+          </span>
           <div class="join bg-base-200/50 rounded-xl border border-base-content/5">
-            <button
-              @click="prevPage"
-              :disabled="currentPage === 1"
-              class="btn btn-ghost join-item btn-sm text-base-content/40 disabled:opacity-10"
-            >
+            <button @click="prevPage" :disabled="currentPage === 1" class="btn btn-ghost join-item btn-sm text-base-content/40 disabled:opacity-10">
               <Icon icon="lucide:chevron-left" />
             </button>
-            <button
-              class="btn btn-ghost join-item btn-sm text-primary font-black px-4"
-            >
+            <button class="btn btn-ghost join-item btn-sm text-primary font-black px-4">
               {{ i18n.pagination.page }} {{ currentPage }}
             </button>
-            <button
-              @click="nextPage"
-              :disabled="currentPage >= totalPages"
-              class="btn btn-ghost join-item btn-sm text-base-content/40 disabled:opacity-10"
-            >
+            <button @click="nextPage" :disabled="currentPage >= totalPages" class="btn btn-ghost join-item btn-sm text-base-content/40 disabled:opacity-10">
               <Icon icon="lucide:chevron-right" />
             </button>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Edit Modal -->
-    <dialog v-if="isEditModalOpen" class="modal font-sans" :class="{ 'modal-open': isEditModalOpen }">
-      <div class="modal-box rounded-[2rem] p-8 shadow-2xl bg-base-100 border border-base-content/5">
-        <h3 class="font-extrabold text-2xl mb-6">Edit Subject Data</h3>
-        <form @submit.prevent="handleUpdate" class="flex flex-col gap-4">
+      <!-- In-Page Form View -->
+      <div v-else-if="currentView === 'form'" class="bg-base-100 backdrop-blur-xl shadow-2xl border border-base-content/5 rounded-[2.5rem] p-8 max-w-3xl" data-aos="fade-up">
+        <!-- Skeleton Loader -->
+        <div v-if="store.loadingDetail" class="animate-pulse space-y-6">
+          <div class="h-10 bg-base-200 rounded w-1/4"></div>
+          <div class="h-12 bg-base-200 rounded-xl w-full"></div>
+          <div class="h-12 bg-base-200 rounded-xl w-full"></div>
+          <div class="h-12 bg-base-200 rounded-xl w-full"></div>
+          <div class="h-12 bg-base-200 rounded-xl w-1/2"></div>
+          <div class="h-12 bg-base-200 rounded-xl w-full mt-8"></div>
+        </div>
+        
+        <form v-else @submit.prevent="handleSubmit" class="flex flex-col gap-5">
           <div class="form-control">
             <label class="label"><span class="label-text font-bold">Subject Name</span></label>
-            <input v-model="editForm.subject_name" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+            <input v-model="form.subject_name" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="Mathematics" />
           </div>
           <div class="form-control">
             <label class="label"><span class="label-text font-bold">Academic Code</span></label>
-            <input v-model="editForm.academic_code" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+            <input v-model="form.academic_code" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="MAT101" />
           </div>
           <div class="form-control">
             <label class="label"><span class="label-text font-bold">Metadata (comma separated)</span></label>
-            <input v-model="metadataInput" type="text" class="input input-bordered focus:border-primary rounded-xl" required />
+            <input v-model="metadataInput" type="text" class="input input-bordered focus:border-primary rounded-xl" placeholder="Core, Science, Grade 10" />
           </div>
-          <div class="modal-action mt-6 gap-2">
-            <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="isEditModalOpen = false">Cancel</button>
-            <button type="submit" class="btn btn-primary rounded-xl font-bold px-8 shadow-lg shadow-primary/20">Save Updates</button>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Status</span></label>
+            <select v-model="form.status" class="select select-bordered focus:border-primary rounded-xl" required>
+              <option value="Active">Active</option>
+              <option value="Non-Aktif">Non-Aktif</option>
+            </select>
+          </div>
+          <div class="form-actions mt-6 flex justify-end gap-3">
+            <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="goBack" :disabled="isSubmitting">Cancel</button>
+            <button type="submit" class="btn btn-primary rounded-xl font-bold px-8 shadow-lg shadow-primary/20" :disabled="isSubmitting">
+              <span v-if="isSubmitting" class="loading loading-spinner loading-sm"></span>
+              {{ isEditMode ? 'Save Updates' : 'Define Subject' }}
+            </button>
           </div>
         </form>
       </div>
-      <form method="dialog" class="modal-backdrop bg-base-300/60 backdrop-blur-sm">
-        <button @click="isEditModalOpen = false">close</button>
-      </form>
-    </dialog>
+    </div>
 
     <Sidebar />
   </div>

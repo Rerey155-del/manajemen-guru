@@ -1,24 +1,33 @@
 import apiClient from './apiClient';
 
-export interface CreateTeacherPayload {
+export interface TeacherType {
+  id?: number | string;
   name: string;
   nip: string;
   email: string;
-  department: string; // Bisa berisi ID dari relasi atau string teks
+  department: string;
   status: string;
 }
 
 export const teacherService = {
-  /**
-   * Mengirim request POST untuk menambahkan guru baru.
-   */
-  async createTeacher(payload: CreateTeacherPayload) {
-    try {
-      const response = await apiClient.post('/teachers', payload);
-      return response.data;
-    } catch (error: any) {
-      // Tangkap dan lempar error untuk di-handle di komponen UI
-      throw new Error(error.response?.data?.message || 'Gagal menambahkan data guru');
-    }
+  async getAll(): Promise<TeacherType[]> {
+    const { data } = await apiClient.get('/teachers');
+    return Array.isArray(data) ? data : (data.data || []);
+  },
+  async getById(id: number | string): Promise<TeacherType> {
+    const { data } = await apiClient.get(`/teachers/${id}`);
+    return data;
+  },
+  async create(payload: Omit<TeacherType, 'id'>) {
+    const { data } = await apiClient.post('/teachers', payload);
+    return data;
+  },
+  async update(id: number | string, payload: Partial<TeacherType>) {
+    const { data } = await apiClient.put(`/teachers/${id}`, payload);
+    return data;
+  },
+  async updateStatus(id: number | string, statusField: string, newValue: any) {
+    const { data } = await apiClient.put(`/teachers/${id}`, { [statusField]: newValue });
+    return data;
   }
 };
