@@ -5,6 +5,8 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import AOS from 'aos'
+import PrimeVue from 'primevue/config';
+import Aura from '@primevue/themes/aura';
 
 AOS.init({
   duration: 800,
@@ -13,6 +15,16 @@ AOS.init({
   mirror: false
 })
 
-createApp(App)
-  .use(router)
-  .mount('#app')
+const app = createApp(App);
+
+app.use(router);
+app.use(PrimeVue, {
+    theme: {
+        preset: Aura,
+        options: {
+            darkModeSelector: '.dark',
+        }
+    }
+});
+
+app.mount('#app');

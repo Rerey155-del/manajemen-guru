@@ -3,6 +3,9 @@ import Sidebar from "@/components/Sidebar.vue";
 import { Icon } from "@iconify/vue";
 import { useTeachers } from "@/composables/useTeachers";
 import { ref, computed } from "vue";
+import { teacherService, type CreateTeacherPayload } from "@/services/teacherService";
+import { subjectService, type SubjectAutocompleteOption } from "@/services/subjectService";
+import AutoComplete from "primevue/autocomplete";
 
 const { teachers, updateTeacher } = useTeachers();
 
@@ -24,6 +27,52 @@ const openEditModal = (teacher: any) => {
 const handleUpdate = async () => {
   await updateTeacher(editForm.value.id, editForm.value);
   isEditModalOpen.value = false;
+};
+
+// --- Add Teacher Logic ---
+const isAddModalOpen = ref(false);
+const isSubmitting = ref(false);
+const addForm = ref<CreateTeacherPayload>({
+  name: "",
+  nip: "",
+  email: "",
+  department: "",
+  status: "Active"
+});
+
+// Autocomplete Logic
+const filteredDepartments = ref<SubjectAutocompleteOption[]>([]);
+const searchDepartment = async (event: any) => {
+  const query = event.query;
+  filteredDepartments.value = await subjectService.autocompleteSubjects(query);
+};
+
+const handleAddTeacher = async () => {
+  try {
+    isSubmitting.value = true;
+    
+    // Konversi object autocomplete ke string department atau ID relasi jika diperlukan
+    const finalPayload: CreateTeacherPayload = {
+      ...addForm.value,
+      department: typeof addForm.value.department === 'object' 
+          ? (addForm.value.department as any).name 
+          : addForm.value.department
+    };
+
+    const newTeacherResponse = await teacherService.createTeacher(finalPayload);
+    console.log("Teacher created successfully:", newTeacherResponse);
+    
+    // Idealnya update `teachers` global state disini jika API mengembalikan data insert utuh
+    // teachers.value.push(newTeacherResponse.data);
+
+    isAddModalOpen.value = false;
+    // Reset Form
+    addForm.value = { name: "", nip: "", email: "", department: "", status: "Active" };
+  } catch (error: any) {
+    alert(error.message);
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 const i18n = {
@@ -129,6 +178,7 @@ const prevPage = () => {
             />
           </div>
           <button
+            @click="isAddModalOpen = true"
             class="btn btn-primary rounded-xl px-6 font-bold gap-2 shadow-lg shadow-primary/20 capitalize"
           >
             <Icon icon="lucide:user-plus" class="text-sm" />
@@ -260,6 +310,59 @@ const prevPage = () => {
         </div>
       </div>
     </div>
+
+    <!-- Add Modal -->
+    <dialog class="modal font-sans" :class="{ 'modal-open': isAddModalOpen }">
+      <div class="modal-box rounded-[2rem] p-8 shadow-2xl bg-base-100 border border-base-content/5 overflow-visible">
+        <h3 class="font-extrabold text-2xl mb-6">Add New Teacher</h3>
+        <form @submit.prevent="handleAddTeacher" class="flex flex-col gap-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Name</span></label>
+            <input v-model="addForm.name" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="John Doe" />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">NIP / NIK</span></label>
+            <input v-model="addForm.nip" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="1987xxxxxxx" />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Email</span></label>
+            <input v-model="addForm.email" type="email" class="input input-bordered focus:border-primary rounded-xl" required placeholder="john.doe@school.edu" />
+          </div>
+          <div class="form-control flex flex-col pt-1">
+            <label class="label"><span class="label-text font-bold">Department (Subject)</span></label>
+            <AutoComplete 
+              v-model="addForm.department" 
+              :suggestions="filteredDepartments" 
+              @complete="searchDepartment" 
+              optionLabel="name" 
+              placeholder="Search Subject (min. 3 chars)"
+              :delay="300"
+              class="w-full"
+              inputClass="input input-bordered focus:border-primary rounded-xl w-full"
+              panelClass="bg-base-100 border shadow-xl rounded-xl mt-1 z-50 text-sm menu p-2"
+            />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Status</span></label>
+            <select v-model="addForm.status" class="select select-bordered focus:border-primary rounded-xl" required>
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+              <option value="Non-Aktif">Non-Aktif</option>
+            </select>
+          </div>
+          <div class="modal-action mt-6 gap-2">
+            <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="isAddModalOpen = false" :disabled="isSubmitting">Cancel</button>
+            <button type="submit" class="btn btn-primary rounded-xl font-bold px-8 shadow-lg shadow-primary/20" :disabled="isSubmitting">
+              <span v-if="isSubmitting" class="loading loading-spinner loading-sm"></span>
+              Create Teacher
+            </button>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop bg-base-300/60 backdrop-blur-sm">
+        <button @click="isAddModalOpen = false" :disabled="isSubmitting">close</button>
+      </form>
+    </dialog>
 
     <!-- Edit Modal -->
     <dialog class="modal font-sans" :class="{ 'modal-open': isEditModalOpen }">

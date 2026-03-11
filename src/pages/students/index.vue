@@ -3,6 +3,9 @@ import Sidebar from "@/components/Sidebar.vue";
 import { Icon } from "@iconify/vue";
 import { useStudents } from "@/composables/useStudents";
 import { ref, computed } from "vue";
+import { studentService, type CreateStudentPayload } from "@/services/studentService";
+import { classService, type ClassAutocompleteOption } from "@/services/classService";
+import AutoComplete from "primevue/autocomplete";
 
 const { students, updateStudent } = useStudents();
 
@@ -24,6 +27,49 @@ const openEditModal = (student: any) => {
 const handleUpdate = async () => {
   await updateStudent(editForm.value.id, editForm.value);
   isEditModalOpen.value = false;
+};
+
+// --- Add Student Logic ---
+const isAddModalOpen = ref(false);
+const isSubmitting = ref(false);
+const addForm = ref<CreateStudentPayload>({
+  name: "",
+  nis: "",
+  gender: "Male",
+  class_name: "",
+  enrollment_status: "Active"
+});
+
+// Autocomplete Logic
+const filteredClasses = ref<ClassAutocompleteOption[]>([]);
+const searchClass = async (event: any) => {
+  const query = event.query;
+  filteredClasses.value = await classService.autocompleteClasses(query);
+};
+
+const handleAddStudent = async () => {
+  try {
+    isSubmitting.value = true;
+    
+    // Konversi object autocomplete ke string class_name atau ID relasi jika diperlukan
+    const finalPayload: CreateStudentPayload = {
+      ...addForm.value,
+      class_name: typeof addForm.value.class_name === 'object' 
+          ? (addForm.value.class_name as any).name 
+          : addForm.value.class_name
+    };
+
+    const newStudentResponse = await studentService.createStudent(finalPayload);
+    console.log("Student created successfully:", newStudentResponse);
+
+    isAddModalOpen.value = false;
+    // Reset Form
+    addForm.value = { name: "", nis: "", gender: "Male", class_name: "", enrollment_status: "Active" };
+  } catch (error: any) {
+    alert(error.message);
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 const i18n = {
@@ -128,6 +174,7 @@ const prevPage = () => {
             />
           </div>
           <button
+            @click="isAddModalOpen = true"
             class="btn btn-secondary rounded-xl px-6 font-bold gap-2 shadow-lg shadow-secondary/20 capitalize"
           >
             <Icon icon="lucide:user-plus" class="text-sm" />
@@ -254,6 +301,62 @@ const prevPage = () => {
         </div>
       </div>
     </div>
+
+    <!-- Add Modal -->
+    <dialog class="modal font-sans" :class="{ 'modal-open': isAddModalOpen }">
+      <div class="modal-box rounded-[2rem] p-8 shadow-2xl bg-base-100 border border-base-content/5 overflow-visible">
+        <h3 class="font-extrabold text-2xl mb-6">Register New Student</h3>
+        <form @submit.prevent="handleAddStudent" class="flex flex-col gap-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Name</span></label>
+            <input v-model="addForm.name" type="text" class="input input-bordered focus:border-secondary rounded-xl" required placeholder="Jane Doe" />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">NIS</span></label>
+            <input v-model="addForm.nis" type="text" class="input input-bordered focus:border-secondary rounded-xl" required placeholder="12345678" />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Gender</span></label>
+            <select v-model="addForm.gender" class="select select-bordered focus:border-secondary rounded-xl" required>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+          <div class="form-control flex flex-col pt-1">
+            <label class="label"><span class="label-text font-bold">Class Name</span></label>
+            <AutoComplete 
+              v-model="addForm.class_name" 
+              :suggestions="filteredClasses" 
+              @complete="searchClass" 
+              optionLabel="name" 
+              placeholder="Search Class (min. 3 chars)"
+              :delay="300"
+              class="w-full"
+              inputClass="input input-bordered focus:border-secondary rounded-xl w-full"
+              panelClass="bg-base-100 border shadow-xl rounded-xl mt-1 z-50 text-sm menu p-2"
+            />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Enrollment Status</span></label>
+            <select v-model="addForm.enrollment_status" class="select select-bordered focus:border-secondary rounded-xl" required>
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+              <option value="Graduated">Graduated</option>
+            </select>
+          </div>
+          <div class="modal-action mt-6 gap-2">
+            <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="isAddModalOpen = false" :disabled="isSubmitting">Cancel</button>
+            <button type="submit" class="btn btn-secondary rounded-xl font-bold px-8 shadow-lg shadow-secondary/20" :disabled="isSubmitting">
+              <span v-if="isSubmitting" class="loading loading-spinner loading-sm"></span>
+              Register Student
+            </button>
+          </div>
+        </form>
+      </div>
+      <form method="dialog" class="modal-backdrop bg-base-300/60 backdrop-blur-sm">
+        <button @click="isAddModalOpen = false" :disabled="isSubmitting">close</button>
+      </form>
+    </dialog>
 
     <!-- Edit Modal -->
     <dialog class="modal font-sans" :class="{ 'modal-open': isEditModalOpen }">
