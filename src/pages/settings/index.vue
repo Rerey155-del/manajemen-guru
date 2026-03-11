@@ -38,7 +38,9 @@ const i18n = {
   },
   profile: {
     title: "Admin Profile",
+    fullName: "Full Name",
     username: "Username",
+    email: "Email",
     password: "Password",
     update: "Update Profile"
   },
@@ -105,32 +107,63 @@ const i18n = {
           <h2 class="text-xl font-bold text-base-content mb-8">{{ i18n.profile.title }}</h2>
 
           <div class="space-y-6">
-            <div class="form-control w-full">
-              <label class="label mb-1">
-                <span
-                  class="label-text text-base-content/40 font-bold uppercase text-[10px] tracking-widest"
-                  >{{ i18n.profile.username }}</span
-                >
-              </label>
-              <input
-                type="text"
-                v-model="profile.username"
-                class="input bg-base-200 border-base-content/5 rounded-xl h-14 font-bold text-base-content/90 focus:border-primary/50"
-              />
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="form-control w-full">
+                <label class="label mb-1">
+                  <span
+                    class="label-text text-base-content/40 font-bold uppercase text-[10px] tracking-widest"
+                    >{{ i18n.profile.fullName }}</span
+                  >
+                </label>
+                <input
+                  type="text"
+                  v-model="profile.full_name"
+                  class="input bg-base-200 border-base-content/5 rounded-xl h-14 font-bold text-base-content/90 focus:border-primary/50"
+                />
+              </div>
 
-            <div class="form-control w-full">
-              <label class="label mb-1">
-                <span
-                  class="label-text text-base-content/40 font-bold uppercase text-[10px] tracking-widest"
-                  >{{ i18n.profile.password }}</span
-                >
-              </label>
-              <input
-                type="password"
-                v-model="profile.password"
-                class="input bg-base-200 border-base-content/5 rounded-xl h-14 font-bold text-base-content/90 focus:border-primary/50"
-              />
+              <div class="form-control w-full">
+                <label class="label mb-1">
+                  <span
+                    class="label-text text-base-content/40 font-bold uppercase text-[10px] tracking-widest"
+                    >{{ i18n.profile.username }}</span
+                  >
+                </label>
+                <input
+                  type="text"
+                  v-model="profile.username"
+                  class="input bg-base-200 border-base-content/5 rounded-xl h-14 font-bold text-base-content/90 focus:border-primary/50"
+                />
+              </div>
+
+              <div class="form-control w-full">
+                <label class="label mb-1">
+                  <span
+                    class="label-text text-base-content/40 font-bold uppercase text-[10px] tracking-widest"
+                    >{{ i18n.profile.email }}</span
+                  >
+                </label>
+                <input
+                  type="email"
+                  v-model="profile.email"
+                  class="input bg-base-200 border-base-content/5 rounded-xl h-14 font-bold text-base-content/90 focus:border-primary/50"
+                />
+              </div>
+
+              <div class="form-control w-full">
+                <label class="label mb-1">
+                  <span
+                    class="label-text text-base-content/40 font-bold uppercase text-[10px] tracking-widest"
+                    >{{ i18n.profile.password }}</span
+                  >
+                </label>
+                <input
+                  type="password"
+                  v-model="profile.password"
+                  class="input bg-base-200 border-base-content/5 rounded-xl h-14 font-bold text-base-content/90 focus:border-primary/50"
+                  placeholder="Leave blank to keep current password"
+                />
+              </div>
             </div>
 
             <div class="pt-4">

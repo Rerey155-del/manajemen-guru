@@ -31,7 +31,9 @@ export function useSettings() {
   const authStore = useAuthStore()
   
   const profile = ref({
+    full_name: authStore.user?.full_name || '',
     username: authStore.user?.username || '',
+    email: authStore.user?.email || '',
     password: '' // Don't expose password or fetch it, it is empty until user inputs new password
   })
 
@@ -46,7 +48,11 @@ export function useSettings() {
     if (!authStore.user?.id) return;
     
     try {
-      const payload: any = { username: profile.value.username }
+      const payload: any = { 
+        full_name: profile.value.full_name,
+        username: profile.value.username,
+        email: profile.value.email
+      }
       if (profile.value.password) {
         payload.password = profile.value.password;
       }
@@ -70,7 +76,9 @@ export function useSettings() {
   // Set the profile if user data changes or component mounts
   onMounted(() => {
      if(authStore.user) {
+        profile.value.full_name = authStore.user.full_name || '';
         profile.value.username = authStore.user.username;
+        profile.value.email = authStore.user.email || '';
      }
   })
 
