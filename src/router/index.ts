@@ -5,79 +5,80 @@ const routes = [
     {
         path: '/login',
         name: 'login',
-        component: () => import('@/pages/login/index.vue')
+        component: () => import('@/pages/login/index.vue'),
+        meta: { title: 'Login' }
     },
     {
         path: '/',
         name : 'dashboard',
         component: () => import('@/pages/dashboard/index.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Dashboard' }
     },
     {
         path: '/settings',
         name : 'settings',
         component: () => import('@/pages/settings/index.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Settings' }
     },
     {
         path: '/teachers',
         name : 'teachers',
         component: () => import('@/pages/teachers/index.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Teachers List' }
     },
     {
         path: '/teachers/edit',
         name : 'edit-teacher',
         component: () => import('@/pages/teachers/edit.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Edit Teacher' }
     },
     {
         path: '/students',
         name : 'students',
         component: () => import('@/pages/students/index.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Students List' }
     },
     {
         path: '/students/edit',
         name : 'edit-student',
         component: () => import('@/pages/students/edit.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Edit Student' }
     },
     {
         path: '/subjects',
         name : 'subjects',
         component: () => import('@/pages/subjects/index.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Subjects List' }
     },
     {
         path: '/subjects/edit',
         name : 'edit-subject',
         component: () => import('@/pages/subjects/edit.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Edit Subject' }
     },
     {
         path: '/classes',
         name : 'classes',
         component: () => import('@/pages/classes/index.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Classes List' }
     },
     {
         path: '/classes/edit',
         name : 'edit-class',
         component: () => import('@/pages/classes/edit.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Edit Class' }
     },
     {
         path: '/schedules',
         name : 'schedules',
         component: () => import('@/pages/schedules/index.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Schedules List' }
     },
     {
         path: '/schedules/edit',
         name : 'edit-schedule',
         component: () => import('@/pages/schedules/edit.vue'),
-        meta: { requiresAuth: true }
+        meta: { requiresAuth: true, title: 'Edit Schedule' }
     }
 ]
 
@@ -97,5 +98,10 @@ router.beforeEach((to, from, next) => {
     next()
   }
 })
+
+router.afterEach((to) => {
+  const defaultTitle = 'Management Sekolah V3';
+  document.title = to.meta.title ? `${to.meta.title} | ${defaultTitle}` : defaultTitle;
+});
 
 export default router
