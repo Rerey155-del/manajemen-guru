@@ -103,10 +103,10 @@ export const useTeacherStore = defineStore('teacher', {
     async toggleItemStatus(id: number | string, statusField: string, newValue: any): Promise<void> {
       this.error = null;
       try {
-        await teacherService.updateStatus(id, statusField, newValue);
+        const updatedItem = await teacherService.updateStatus(id, statusField, newValue);
         const index = this.items.findIndex(i => String(i.id) === String(id));
         if (index !== -1) {
-          (this.items[index] as any)[statusField] = newValue;
+          this.items[index] = { ...this.items[index], ...updatedItem };
         }
       } catch (err: any) {
         this.error = err.message || 'Failed to update teacher status';
