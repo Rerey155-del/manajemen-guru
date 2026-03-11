@@ -15,7 +15,8 @@ const form = ref({
   name: "",
   nip: "",
   email: "",
-  department: ""
+  department: "",
+  status: "Active"
 });
 
 // Autocomplete Logic
@@ -34,7 +35,6 @@ const handleSubmit = async () => {
     isSubmitting.value = true;
     const finalPayload = {
       ...form.value,
-      status: "Active",
       department: typeof form.value.department === 'object' 
           ? (form.value.department as any).name 
           : form.value.department
@@ -111,6 +111,13 @@ const i18n = {
               inputClass="input input-bordered focus:border-primary rounded-xl w-full"
               panelClass="bg-base-100 border shadow-xl rounded-xl mt-1 z-50 text-sm menu p-2"
             />
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-bold">Status</span></label>
+            <select v-model="form.status" class="select select-bordered focus:border-primary rounded-xl" required>
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+            </select>
           </div>
 
           <div class="form-actions mt-6 flex justify-end gap-3">
