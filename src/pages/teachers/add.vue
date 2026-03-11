@@ -116,7 +116,7 @@ const i18n = {
             <label class="label"><span class="label-text font-bold">Status</span></label>
             <select v-model="form.status" class="select select-bordered focus:border-primary rounded-xl" required>
               <option value="Active">Active</option>
-              <option value="Suspended">Suspended</option>
+              <option value="Non-Active">Non-Active</option>
             </select>
           </div>
 

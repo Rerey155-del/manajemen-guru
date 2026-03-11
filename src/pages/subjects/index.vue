@@ -152,8 +152,7 @@ const prevPage = () => {
               <tr class="text-base-content/30 font-bold uppercase tracking-widest text-[10px] border-b border-base-content/5">
                 <th class="pl-12 py-8">{{ i18n.table.name }}</th>
                 <th class="py-8">{{ i18n.table.code }}</th>
-                
-                <th class="py-8 text-center">{{ i18n.table.status }}</th>
+              
                 <th class="pr-12 py-8 text-right">{{ i18n.table.actions }}</th>
               </tr>
             </thead>
@@ -168,30 +167,6 @@ const prevPage = () => {
                 </td>
                 <td class="py-10 font-bold text-lg text-base-content/40 font-mono tracking-tighter">
                   {{ sub.academic_code }}
-                </td>
-                <td class="py-10">
-                  <div class="flex flex-wrap gap-2 max-w-xs">
-                    <span v-if="!sub.metadata || !sub.metadata.length" class="text-xs text-base-content/30 italic">No Metadata</span>
-                    <span
-                      v-else
-                      v-for="tag in sub.metadata"
-                      :key="tag"
-                      class="px-4 py-1.5 bg-base-content/5 text-base-content/60 rounded-lg text-[10px] font-bold border border-base-content/5"
-                    >
-                      {{ tag }}
-                    </span>
-                  </div>
-                </td>
-                <td class="py-10 text-center">
-                  <span
-                    :class="`badge badge-sm font-black uppercase text-[10px] p-2 h-auto ${
-                      (sub.status || 'Active') === 'Active'
-                        ? 'badge-success shadow-lg shadow-success/20'
-                        : 'badge-ghost opacity-40'
-                    }`"
-                  >
-                    {{ sub.status || 'Active' }}
-                  </span>
                 </td>
                 <td class="pr-12 py-10 text-right">
                   <div class="flex justify-end items-center gap-3">
