@@ -125,7 +125,7 @@ const i18n = {
 // Search and Pagination Logic
 const searchQuery = ref("");
 const currentPage = ref(1);
-const itemsPerPage = 5;
+const itemsPerPage = 10;
 
 const filteredStudents = computed(() => {
   return store.items.filter((s) =>

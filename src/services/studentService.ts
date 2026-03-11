@@ -7,12 +7,18 @@ export interface StudentType {
   gender: string;
   class_name: string;
   enrollment_status: string;
+  deleted_at?: string | null;
 }
 
-let mockStudents: StudentType[] = [
-  { id: 1, name: "Andi Wijaya", nis: "20230001", gender: "Male", class_name: "10A", enrollment_status: "Active" },
-  { id: 2, name: "Bunga Pertiwi", nis: "20230002", gender: "Female", class_name: "10B", enrollment_status: "Active" }
-];
+let mockStudents: StudentType[] = Array.from({ length: 15 }, (_, i) => ({
+  id: i + 1,
+  name: `Siswa ${i + 1}`,
+  nis: `2023${(i + 1).toString().padStart(4, '0')}`,
+  gender: i % 2 === 0 ? "Male" : "Female",
+  class_name: i % 2 === 0 ? "10A" : "10B",
+  enrollment_status: i % 4 === 0 ? "Suspended" : "Active",
+  deleted_at: null
+}));
 
 export const studentService = {
   async getAll(): Promise<StudentType[]> {
@@ -43,6 +49,12 @@ export const studentService = {
     const index = mockStudents.findIndex(t => String(t.id) === String(id));
     if (index === -1) throw new Error("Student not found");
     (mockStudents[index] as any)[statusField] = newValue;
-    return { ...mockStudents[index] };
+    
+    // Soft delete simulation
+    if (statusField === 'status' || statusField === 'enrollment_status') {
+      mockStudents[index]!.deleted_at = (newValue === 'Active') ? null : new Date().toISOString();
+    }
+    
+    return { ...mockStudents[index]! };
   }
 };

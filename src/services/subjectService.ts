@@ -11,12 +11,17 @@ export interface SubjectType {
   academic_code: string;
   metadata: string[] | string;
   status?: string; // Optional field for status changes
+  deleted_at?: string | null;
 }
 
-let mockSubjects: SubjectType[] = [
-  { id: 1, subject_name: "Mathematics", academic_code: "MAT101", metadata: ["Core", "Science"], status: "Active" },
-  { id: 2, subject_name: "English", academic_code: "ENG101", metadata: ["Core", "Language"], status: "Active" }
-];
+let mockSubjects: SubjectType[] = Array.from({ length: 15 }, (_, i) => ({
+  id: i + 1,
+  subject_name: `Subject ${i + 1}`,
+  academic_code: `SUBJ${(i + 1).toString().padStart(3, '0')}`,
+  metadata: ["Core", i % 2 === 0 ? "Science" : "Language", `Grade 10`],
+  status: i % 6 === 0 ? "Non-Aktif" : "Active",
+  deleted_at: null
+}));
 
 export const subjectService = {
   async autocompleteSubjects(query: string): Promise<SubjectAutocompleteOption[]> {
@@ -54,6 +59,12 @@ export const subjectService = {
     const index = mockSubjects.findIndex(t => String(t.id) === String(id));
     if (index === -1) throw new Error("Subject not found");
     (mockSubjects[index] as any)[statusField] = newValue;
-    return { ...mockSubjects[index] };
+    
+    // Soft delete simulation
+    if (statusField === 'status' || statusField === 'enrollment_status') {
+      mockSubjects[index]!.deleted_at = (newValue === 'Active') ? null : new Date().toISOString();
+    }
+    
+    return { ...mockSubjects[index]! };
   }
 };

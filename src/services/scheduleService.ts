@@ -8,12 +8,20 @@ export interface ScheduleType {
   instructor: string;
   subject: string;
   status?: string;
+  deleted_at?: string | null;
 }
 
-let mockSchedules: ScheduleType[] = [
-  { id: 1, class_name: "Class 10A", day: "Monday", period_duration: "08:00 - 09:30", instructor: "Budi Santoso", subject: "Mathematics", status: "Active" },
-  { id: 2, class_name: "Class 10B", day: "Tuesday", period_duration: "10:00 - 11:30", instructor: "Siti Aminah", subject: "Science", status: "Active" }
-];
+const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+let mockSchedules: ScheduleType[] = Array.from({ length: 15 }, (_, i) => ({
+  id: i + 1,
+  class_name: `Class 10${String.fromCharCode(65 + (i % 5))}`,
+  day: days[i % 5] || "Monday",
+  period_duration: `${8 + (i % 4)}:00 - ${9 + (i % 4)}:30`,
+  instructor: `Guru ${i + 1}`,
+  subject: `Subject ${i + 1}`,
+  status: i % 8 === 0 ? "Suspended" : "Active",
+  deleted_at: null
+}));
 
 export const scheduleService = {
   async getAll(): Promise<ScheduleType[]> {
@@ -44,6 +52,12 @@ export const scheduleService = {
     const index = mockSchedules.findIndex(t => String(t.id) === String(id));
     if (index === -1) throw new Error("Schedule not found");
     (mockSchedules[index] as any)[statusField] = newValue;
-    return { ...mockSchedules[index] };
+    
+    // Soft delete simulation
+    if (statusField === 'status' || statusField === 'enrollment_status') {
+      mockSchedules[index]!.deleted_at = (newValue === 'Active') ? null : new Date().toISOString();
+    }
+    
+    return { ...mockSchedules[index]! };
   }
 };

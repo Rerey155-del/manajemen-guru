@@ -7,12 +7,18 @@ export interface TeacherType {
   email: string;
   department: string;
   status: string;
+  deleted_at?: string | null;
 }
 
-let mockTeachers: TeacherType[] = [
-  { id: 1, name: "Budi Santoso", nip: "198001012010011001", email: "budi.santoso@school.edu", department: "Mathematics", status: "Active" },
-  { id: 2, name: "Siti Aminah", nip: "198502022012022002", email: "siti.aminah@school.edu", department: "Science", status: "Active" }
-];
+let mockTeachers: TeacherType[] = Array.from({ length: 15 }, (_, i) => ({
+  id: i + 1,
+  name: `Guru ${i + 1}`,
+  nip: `198000000${(i + 1).toString().padStart(3, '0')}`,
+  email: `guru${i + 1}@school.edu`,
+  department: i % 2 === 0 ? "Mathematics" : "Science",
+  status: i % 5 === 0 ? 'Non-Aktif' : 'Active',
+  deleted_at: null
+}));
 
 export const teacherService = {
   async getAll(): Promise<TeacherType[]> {
@@ -43,6 +49,12 @@ export const teacherService = {
     const index = mockTeachers.findIndex(t => String(t.id) === String(id));
     if (index === -1) throw new Error("Teacher not found");
     (mockTeachers[index] as any)[statusField] = newValue;
-    return { ...mockTeachers[index] };
+    
+    // Soft delete simulation
+    if (statusField === 'status' || statusField === 'enrollment_status') {
+      mockTeachers[index]!.deleted_at = (newValue === 'Active') ? null : new Date().toISOString();
+    }
+    
+    return { ...mockTeachers[index]! };
   }
 };
