@@ -21,7 +21,8 @@ export const subjectService = {
   },
   async getById(id: number | string): Promise<SubjectType> {
     const response = await apiClient.get(`/subjects/${id}`);
-    return response.data;
+    // Handle wrapped response if necessary, otherwise return response.data
+    return response.data.data || response.data;
   },
   async create(payload: Omit<SubjectType, 'id'>) {
     const response = await apiClient.post('/subjects', payload);

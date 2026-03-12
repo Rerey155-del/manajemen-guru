@@ -20,16 +20,22 @@ const metadataInput = ref("");
 
 onMounted(async () => {
   const id = route.params.id as string;
-  const detail = await store.fetchDetail(id);
-  if (detail) {
-    form.value = { 
-      id: detail.id as string | number, 
-      subject_name: detail.subject_name || "", 
-      academic_code: detail.academic_code || "", 
-     
-    };
-    metadataInput.value = Array.isArray(detail.metadata) ? detail.metadata.join(", ") : "";
-  } else {
+  try {
+    await store.fetchDetail(id);
+    if (store.detail) {
+      form.value = { 
+        id: store.detail.id as string | number, 
+        subject_name: store.detail.subject_name || "", 
+        academic_code: store.detail.academic_code || "", 
+      };
+      metadataInput.value = Array.isArray(store.detail.metadata) 
+        ? store.detail.metadata.join(", ") 
+        : (store.detail.metadata as string) || "";
+    } else {
+      router.push('/subjects');
+    }
+  } catch (error) {
+    console.error("Failed to fetch subject detail:", error);
     router.push('/subjects');
   }
 });
