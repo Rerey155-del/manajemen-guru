@@ -1,45 +1,50 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { Icon } from "@iconify/vue";
 import { useAuth } from "@/composables/useAuth";
 import { useRouter, useRoute } from "vue-router";
-import { computed } from "vue";
+import { useDashboardStore } from "@/stores/useDashboardStore";
 
+const dashboardStore = useDashboardStore();
 const { logout } = useAuth();
 const router = useRouter();
 const route = useRoute();
 
-const i18n = {
-  brand: "Management Sekolah",
-  version: "V3",
-  logout: "Logout",
-  menus: {
-    main: "Main Menu",
-    academic: "Academic Center",
-    system: "System & Preferences",
-  },
-  items: {
-    dashboard: "Dashboard",
-    teachers: "Teachers",
-    students: "Students",
-    subjects: "Subjects",
-    classes: "Classes",
-    schedules: "Schedules",
-    settings: "Settings",
-  },
-};
+const i18n = computed(() => {
+  const isId = dashboardStore.locale === 'id';
+  return {
+    brand: isId ? "Manajemen Sekolah" : "School Management",
+    version: "V3",
+    logout: isId ? "Keluar" : "Logout",
+    menus: {
+      main: isId ? "Menu Utama" : "Main Menu",
+      academic: isId ? "Pusat Akademik" : "Academic Center",
+      system: isId ? "Sistem & Preferensi" : "System & Preferences",
+    },
+    items: {
+      dashboard: isId ? "Dasbor" : "Dashboard",
+      teachers: isId ? "Guru" : "Teachers",
+      students: isId ? "Siswa" : "Students",
+      subjects: isId ? "Mata Pelajaran" : "Subjects",
+      classes: isId ? "Kelas" : "Classes",
+      schedules: isId ? "Jadwal" : "Schedules",
+      settings: isId ? "Pengaturan" : "Settings",
+    },
+  };
+});
 
-const menuItems = [
-  { name: i18n.items.dashboard, path: "/", icon: "lucide:layout-dashboard" },
-  { name: i18n.items.teachers, path: "/teachers", icon: "lucide:users" },
+const menuItems = computed(() => [
+  { name: i18n.value.items.dashboard, path: "/", icon: "lucide:layout-dashboard" },
+  { name: i18n.value.items.teachers, path: "/teachers", icon: "lucide:users" },
   {
-    name: i18n.items.students,
+    name: i18n.value.items.students,
     path: "/students",
     icon: "lucide:graduation-cap",
   },
-  { name: i18n.items.subjects, path: "/subjects", icon: "lucide:book-open" },
-  { name: i18n.items.classes, path: "/classes", icon: "lucide:school" },
-  { name: i18n.items.schedules, path: "/schedules", icon: "lucide:calendar" },
-];
+  { name: i18n.value.items.subjects, path: "/subjects", icon: "lucide:book-open" },
+  { name: i18n.value.items.classes, path: "/classes", icon: "lucide:school" },
+  { name: i18n.value.items.schedules, path: "/schedules", icon: "lucide:calendar" },
+]);
 
 const isActive = (path: string) => {
   if (path === "/") return route.path === "/";
@@ -141,7 +146,4 @@ const handleLogout = () => {
 </template>
 
 <style scoped>
-.active {
-  @apply bg-primary/10 text-primary font-bold;
-}
 </style>
