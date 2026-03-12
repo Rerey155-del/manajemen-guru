@@ -1,6 +1,3 @@
-<script setup lang="ts">
-// Reusable skeleton for Edit Pages
-</script>
 
 <template>
   <div class="animate-pulse space-y-10">
