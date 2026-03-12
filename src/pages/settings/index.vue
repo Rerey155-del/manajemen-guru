@@ -195,19 +195,6 @@ const handleUserUpdate = async () => {
                   class="input bg-base-200 border-base-content/5 rounded-xl h-14 font-bold text-base-content/90 focus:border-primary/50"
                 />
               </div>
-              <div class="form-control w-full">
-                <label class="label mb-1">
-                  <span
-                    class="label-text text-base-content/40 font-bold uppercase text-[10px] tracking-widest"
-                    >{{ i18n.profile.password }}</span
-                  >
-                </label>
-                <input
-                  type="password"
-                  v-model="profile.password"
-                  class="input bg-base-200 border-base-content/5 rounded-xl h-14 font-bold text-base-content/90 focus:border-primary/50"
-                />
-              </div>
             </div>
 
             <div class="pt-4">
