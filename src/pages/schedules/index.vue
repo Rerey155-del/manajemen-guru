@@ -13,7 +13,7 @@ onMounted(() => {
 });
 
 const openAddForm = () => {
-  router.push('/schedules/add');
+  router.push("/schedules/add");
 };
 
 const openEditForm = (id: number | string) => {
@@ -25,12 +25,12 @@ const i18n = {
   version: "V3",
   header: {
     title: "Academic Timeline",
-    subtitle: "Dynamic scheduling and classroom occupancy monitoring."
+    subtitle: "Dynamic scheduling and classroom occupancy monitoring.",
   },
   actions: {
     search: "Search schedules...",
     add: "Slot Allocation",
-    back: "Back to List"
+    back: "Back to List",
   },
   table: {
     className: "Class",
@@ -38,15 +38,16 @@ const i18n = {
     period: "Period / Duration",
     instructor: "Instructor",
     subject: "Subject",
+
     actions: "Actions",
-    noResults: "No results found for"
+    noResults: "No results found for",
   },
   pagination: {
     showing: "Showing",
     of: "of",
     schedules: "Schedules",
-    page: "Page"
-  }
+    page: "Page",
+  },
 };
 
 // Search and Pagination Logic
@@ -55,10 +56,11 @@ const currentPage = ref(1);
 const itemsPerPage = 10;
 
 const filteredSchedules = computed(() => {
-  return store.items.filter((s) =>
-    s.class_name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    s.instructor.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    s.subject.toLowerCase().includes(searchQuery.value.toLowerCase())
+  return store.items.filter(
+    (s) =>
+      s.class_name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      s.instructor.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      s.subject.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
 
@@ -86,20 +88,30 @@ const prevPage = () => {
 
     <div class="drawer-content flex flex-col p-6 lg:p-10">
       <!-- Mobile Navbar Toggle -->
-      <div class="flex items-center justify-between lg:hidden mb-6 bg-base-100 p-4 rounded-2xl shadow-sm">
+      <div
+        class="flex items-center justify-between lg:hidden mb-6 bg-base-100 p-4 rounded-2xl shadow-sm"
+      >
         <label for="my-drawer-2" class="btn btn-ghost btn-circle drawer-button">
           <Icon icon="lucide:menu" class="text-xl" />
         </label>
-        <span class="text-xl font-bold tracking-tight">{{ i18n.brand }}<span class="text-primary">{{ i18n.version }}</span></span>
+        <span class="text-xl font-bold tracking-tight"
+          >{{ i18n.brand
+          }}<span class="text-primary">{{ i18n.version }}</span></span
+        >
         <div class="avatar w-8 h-8 rounded-full overflow-hidden">
           <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" />
         </div>
       </div>
 
       <!-- Header Section -->
-      <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10" data-aos="fade-down">
+      <header
+        class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10"
+        data-aos="fade-down"
+      >
         <div>
-          <h1 class="text-4xl font-extrabold tracking-tight text-base-content mb-2">
+          <h1
+            class="text-4xl font-extrabold tracking-tight text-base-content mb-2"
+          >
             {{ i18n.header.title }}
           </h1>
           <p class="text-base-content/40 font-medium">
@@ -109,7 +121,10 @@ const prevPage = () => {
         <div class="flex items-center gap-3">
           <!-- Search Bar -->
           <div class="relative group">
-            <Icon icon="lucide:search" class="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/20 group-focus-within:text-primary transition-colors" />
+            <Icon
+              icon="lucide:search"
+              class="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/20 group-focus-within:text-primary transition-colors"
+            />
             <input
               v-model="searchQuery"
               @input="currentPage = 1"
@@ -129,7 +144,7 @@ const prevPage = () => {
       </header>
 
       <!-- Main Content Area -->
-      <div 
+      <div
         class="bg-base-100 backdrop-blur-xl shadow-2xl border border-base-content/5 rounded-[2.5rem] overflow-hidden flex flex-col"
         data-aos="fade-right"
         data-aos-delay="200"
@@ -140,7 +155,9 @@ const prevPage = () => {
         <div v-else class="overflow-x-auto">
           <table class="table table-lg w-full">
             <thead>
-              <tr class="text-base-content/30 font-bold uppercase tracking-widest text-[10px] border-b border-base-content/5">
+              <tr
+                class="text-base-content/30 font-bold uppercase tracking-widest text-[10px] border-b border-base-content/5"
+              >
                 <th class="pl-12 py-8">{{ i18n.table.className }}</th>
                 <th class="py-8">{{ i18n.table.day }}</th>
                 <th class="py-8">{{ i18n.table.period }}</th>
@@ -162,7 +179,9 @@ const prevPage = () => {
                   {{ sch.day }}
                 </td>
                 <td class="py-10">
-                  <span class="px-5 py-2.5 bg-primary/10 text-primary rounded-xl font-bold text-xs border border-primary/20">
+                  <span
+                    class="px-5 py-2.5 bg-primary/10 text-primary rounded-xl font-bold text-xs border border-primary/20"
+                  >
                     {{ sch.period_duration }}
                   </span>
                 </td>
@@ -172,7 +191,7 @@ const prevPage = () => {
                 <td class="py-10 font-bold text-lg text-[#6366f1]">
                   {{ sch.subject }}
                 </td>
-               
+
                 <td class="pr-12 py-10 text-right">
                   <div class="flex justify-end items-center gap-3">
                     <button
@@ -186,7 +205,10 @@ const prevPage = () => {
                 </td>
               </tr>
               <tr v-if="paginatedSchedules.length === 0">
-                <td colspan="7" class="py-20 text-center text-base-content/20 font-bold italic">
+                <td
+                  colspan="8"
+                  class="py-20 text-center text-base-content/20 font-bold italic"
+                >
                   {{ i18n.table.noResults }} "{{ searchQuery }}"
                 </td>
               </tr>
@@ -195,19 +217,35 @@ const prevPage = () => {
         </div>
 
         <!-- Pagination Controls -->
-        <div v-if="!store.loadingList && store.items.length > 0" class="p-6 border-t border-base-content/5 flex items-center justify-between bg-base-content/5">
+        <div
+          v-if="!store.loadingList && store.items.length > 0"
+          class="p-6 border-t border-base-content/5 flex items-center justify-between bg-base-content/5"
+        >
           <span class="text-base-content/20 text-sm font-bold">
-            {{ i18n.pagination.showing }} {{ paginatedSchedules.length }} {{ i18n.pagination.of }}
-            {{ filteredSchedules.length }} {{ i18n.pagination.schedules }}
+            {{ i18n.pagination.showing }} {{ paginatedSchedules.length }}
+            {{ i18n.pagination.of }} {{ filteredSchedules.length }}
+            {{ i18n.pagination.schedules }}
           </span>
-          <div class="join bg-base-200/50 rounded-xl border border-base-content/5">
-            <button @click="prevPage" :disabled="currentPage === 1" class="btn btn-ghost join-item btn-sm text-base-content/40 disabled:opacity-10">
+          <div
+            class="join bg-base-200/50 rounded-xl border border-base-content/5"
+          >
+            <button
+              @click="prevPage"
+              :disabled="currentPage === 1"
+              class="btn btn-ghost join-item btn-sm text-base-content/40 disabled:opacity-10"
+            >
               <Icon icon="lucide:chevron-left" />
             </button>
-            <button class="btn btn-ghost join-item btn-sm text-primary font-black px-4">
+            <button
+              class="btn btn-ghost join-item btn-sm text-primary font-black px-4"
+            >
               {{ i18n.pagination.page }} {{ currentPage }}
             </button>
-            <button @click="nextPage" :disabled="currentPage >= totalPages" class="btn btn-ghost join-item btn-sm text-base-content/40 disabled:opacity-10">
+            <button
+              @click="nextPage"
+              :disabled="currentPage >= totalPages"
+              class="btn btn-ghost join-item btn-sm text-base-content/40 disabled:opacity-10"
+            >
               <Icon icon="lucide:chevron-right" />
             </button>
           </div>

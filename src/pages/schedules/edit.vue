@@ -5,9 +5,18 @@ import { useScheduleStore } from "@/stores/useScheduleStore";
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import AutoComplete from "primevue/autocomplete";
-import { classService, type ClassAutocompleteOption } from "@/services/classService";
-import { teacherService, type TeacherAutocompleteOption } from "@/services/teacherService";
-import { subjectService, type SubjectAutocompleteOption } from "@/services/subjectService";
+import {
+  classService,
+  type ClassAutocompleteOption,
+} from "@/services/classService";
+import {
+  teacherService,
+  type TeacherAutocompleteOption,
+} from "@/services/teacherService";
+import {
+  subjectService,
+  type SubjectAutocompleteOption,
+} from "@/services/subjectService";
 
 const store = useScheduleStore();
 const router = useRouter();
@@ -16,13 +25,13 @@ const route = useRoute();
 const isSubmitting = ref(false);
 
 const form = ref({
-  id: '' as string | number,
+  id: "" as string | number,
   class_name: "" as any,
   day: "",
   period_duration: "",
   instructor: "" as any,
   subject: "" as any,
-  status: "Active"
+ 
 });
 
 const startTime = ref("");
@@ -36,12 +45,16 @@ const searchClass = async (event: any) => {
 
 const filteredTeachers = ref<TeacherAutocompleteOption[]>([]);
 const searchTeacher = async (event: any) => {
-  filteredTeachers.value = await teacherService.autocompleteTeachers(event.query);
+  filteredTeachers.value = await teacherService.autocompleteTeachers(
+    event.query
+  );
 };
 
 const filteredSubjects = ref<SubjectAutocompleteOption[]>([]);
 const searchSubject = async (event: any) => {
-  filteredSubjects.value = await subjectService.autocompleteSubjects(event.query);
+  filteredSubjects.value = await subjectService.autocompleteSubjects(
+    event.query
+  );
 };
 
 onMounted(async () => {
@@ -49,26 +62,26 @@ onMounted(async () => {
   const detail = await store.fetchDetail(id);
   if (detail) {
     if (detail.period_duration) {
-      const times = detail.period_duration.split(' - ');
-      startTime.value = times[0] || '';
-      endTime.value = times[1] || '';
+      const times = detail.period_duration.split(" - ");
+      startTime.value = times[0] || "";
+      endTime.value = times[1] || "";
     }
-    form.value = { 
-      id: detail.id as string | number, 
-      class_name: detail.class_name ? { name: detail.class_name } : '', 
-      day: detail.day, 
-      period_duration: detail.period_duration, 
-      instructor: detail.instructor ? { name: detail.instructor } : '', 
-      subject: detail.subject ? { name: detail.subject } : '',
-      status: detail.status || 'Active'
+    form.value = {
+      id: detail.id as string | number,
+      class_name: detail.class_name ? { name: detail.class_name } : "",
+      day: detail.day,
+      period_duration: detail.period_duration,
+      instructor: detail.instructor ? { name: detail.instructor } : "",
+      subject: detail.subject ? { name: detail.subject } : "",
+     
     };
   } else {
-    router.push('/schedules');
+    router.push("/schedules");
   }
 });
 
 const goBack = () => {
-  router.push('/schedules');
+  router.push("/schedules");
 };
 
 const handleSubmit = async () => {
@@ -77,15 +90,24 @@ const handleSubmit = async () => {
     const { id, ...putPayloadTemp } = form.value;
     const putPayload = {
       ...putPayloadTemp,
-      class_name: typeof putPayloadTemp.class_name === 'object' ? (putPayloadTemp.class_name as any).name : putPayloadTemp.class_name,
+      class_name:
+        typeof putPayloadTemp.class_name === "object"
+          ? (putPayloadTemp.class_name as any).name
+          : putPayloadTemp.class_name,
       period_duration: `${startTime.value} - ${endTime.value}`,
-      instructor: typeof putPayloadTemp.instructor === 'object' ? (putPayloadTemp.instructor as any).name : putPayloadTemp.instructor,
-      subject: typeof putPayloadTemp.subject === 'object' ? (putPayloadTemp.subject as any).name : putPayloadTemp.subject,
+      instructor:
+        typeof putPayloadTemp.instructor === "object"
+          ? (putPayloadTemp.instructor as any).name
+          : putPayloadTemp.instructor,
+      subject:
+        typeof putPayloadTemp.subject === "object"
+          ? (putPayloadTemp.subject as any).name
+          : putPayloadTemp.subject,
     };
     await store.updateItem(id, putPayload);
-    router.push('/schedules');
+    router.push("/schedules");
   } catch (error: any) {
-    alert(error.message || 'An error occurred');
+    alert(error.message || "An error occurred");
   } finally {
     isSubmitting.value = false;
   }
@@ -96,11 +118,11 @@ const i18n = {
   version: "V3",
   header: {
     title: "Edit Schedule Slot",
-    subtitle: "Modify existing schedule assignments."
+    subtitle: "Modify existing schedule assignments.",
   },
   actions: {
-    back: "Back to List"
-  }
+    back: "Back to List",
+  },
 };
 </script>
 
@@ -109,9 +131,14 @@ const i18n = {
     <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
 
     <div class="drawer-content flex flex-col p-6 lg:p-10">
-      <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10" data-aos="fade-down">
+      <header
+        class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10"
+        data-aos="fade-down"
+      >
         <div>
-          <h1 class="text-4xl font-extrabold tracking-tight text-base-content mb-2">
+          <h1
+            class="text-4xl font-extrabold tracking-tight text-base-content mb-2"
+          >
             {{ i18n.header.title }}
           </h1>
           <p class="text-base-content/40 font-medium">
@@ -119,14 +146,20 @@ const i18n = {
           </p>
         </div>
         <div class="flex items-center gap-3">
-          <button @click="goBack" class="btn btn-ghost rounded-xl px-6 font-bold gap-2 capitalize">
+          <button
+            @click="goBack"
+            class="btn btn-ghost rounded-xl px-6 font-bold gap-2 capitalize"
+          >
             <Icon icon="lucide:arrow-left" class="text-sm" />
             {{ i18n.actions.back }}
           </button>
         </div>
       </header>
 
-      <div class="bg-base-100 backdrop-blur-xl shadow-2xl border border-base-content/5 rounded-[2.5rem] p-8 max-w-3xl" data-aos="fade-up">
+      <div
+        class="bg-base-100 backdrop-blur-xl shadow-2xl border border-base-content/5 rounded-[2.5rem] p-8 max-w-3xl"
+        data-aos="fade-up"
+      >
         <!-- Skeleton Loader -->
         <div v-if="store.loadingDetail" class="animate-pulse space-y-6">
           <div class="h-10 bg-base-200 rounded w-1/4"></div>
@@ -137,15 +170,17 @@ const i18n = {
           <div class="h-12 bg-base-200 rounded-xl w-1/2"></div>
           <div class="h-12 bg-base-200 rounded-xl w-full mt-8"></div>
         </div>
-        
+
         <form v-else @submit.prevent="handleSubmit" class="flex flex-col gap-5">
           <div class="form-control flex flex-col pt-1">
-            <label class="label"><span class="label-text font-bold">Class / Group</span></label>
-            <AutoComplete 
-              v-model="form.class_name" 
-              :suggestions="filteredClasses" 
-              @complete="searchClass" 
-              optionLabel="name" 
+            <label class="label"
+              ><span class="label-text font-bold">Class / Group</span></label
+            >
+            <AutoComplete
+              v-model="form.class_name"
+              :suggestions="filteredClasses"
+              @complete="searchClass"
+              optionLabel="name"
               placeholder="Search Class (e.g., Grade 10A)"
               :delay="300"
               class="w-full"
@@ -154,24 +189,45 @@ const i18n = {
             />
           </div>
           <div class="form-control">
-            <label class="label"><span class="label-text font-bold">Date</span></label>
-            <input v-model="form.day" type="date" class="input input-bordered focus:border-primary rounded-xl" required />
+            <label class="label"
+              ><span class="label-text font-bold">Date</span></label
+            >
+            <input
+              v-model="form.day"
+              type="date"
+              class="input input-bordered focus:border-primary rounded-xl"
+              required
+            />
           </div>
           <div class="form-control">
-            <label class="label"><span class="label-text font-bold">Duration</span></label>
+            <label class="label"
+              ><span class="label-text font-bold">Duration</span></label
+            >
             <div class="flex items-center gap-3">
-              <input type="time" v-model="startTime" class="input input-bordered focus:border-primary rounded-xl w-full" required />
+              <input
+                type="time"
+                v-model="startTime"
+                class="input input-bordered focus:border-primary rounded-xl w-full"
+                required
+              />
               <span class="font-bold text-base-content/40">to</span>
-              <input type="time" v-model="endTime" class="input input-bordered focus:border-primary rounded-xl w-full" required />
+              <input
+                type="time"
+                v-model="endTime"
+                class="input input-bordered focus:border-primary rounded-xl w-full"
+                required
+              />
             </div>
           </div>
           <div class="form-control flex flex-col pt-1">
-            <label class="label"><span class="label-text font-bold">Instructor Name</span></label>
-            <AutoComplete 
-              v-model="form.instructor" 
-              :suggestions="filteredTeachers" 
-              @complete="searchTeacher" 
-              optionLabel="name" 
+            <label class="label"
+              ><span class="label-text font-bold">Instructor Name</span></label
+            >
+            <AutoComplete
+              v-model="form.instructor"
+              :suggestions="filteredTeachers"
+              @complete="searchTeacher"
+              optionLabel="name"
               placeholder="Search Instructor (e.g., Mr. Wilson)"
               :delay="300"
               class="w-full"
@@ -180,12 +236,14 @@ const i18n = {
             />
           </div>
           <div class="form-control flex flex-col pt-1">
-            <label class="label"><span class="label-text font-bold">Subject</span></label>
-            <AutoComplete 
-              v-model="form.subject" 
-              :suggestions="filteredSubjects" 
-              @complete="searchSubject" 
-              optionLabel="name" 
+            <label class="label"
+              ><span class="label-text font-bold">Subject</span></label
+            >
+            <AutoComplete
+              v-model="form.subject"
+              :suggestions="filteredSubjects"
+              @complete="searchSubject"
+              optionLabel="name"
               placeholder="Search Subject (e.g., Mathematics)"
               :delay="300"
               class="w-full"
@@ -193,23 +251,29 @@ const i18n = {
               panelClass="bg-base-100 border shadow-xl rounded-xl mt-1 z-50 text-sm menu p-2"
             />
           </div>
-          <div class="form-control">
-            <label class="label"><span class="label-text font-bold">Status</span></label>
-            <select v-model="form.status" class="select select-bordered focus:border-primary rounded-xl" required>
-              <option value="Active">Active</option>
-              <option value="Suspended">Suspended</option>
-            </select>
-          </div>
           <div class="form-actions mt-6 flex justify-end gap-3">
-            <button type="button" class="btn btn-ghost rounded-xl font-bold" @click="goBack" :disabled="isSubmitting">Cancel</button>
-            <button type="submit" class="btn btn-primary rounded-xl font-bold px-8 shadow-lg shadow-primary/20" :disabled="isSubmitting">
-              <span v-if="isSubmitting" class="loading loading-spinner loading-sm"></span>
+            <button
+              type="button"
+              class="btn btn-ghost rounded-xl font-bold"
+              @click="goBack"
+              :disabled="isSubmitting"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary rounded-xl font-bold px-8 shadow-lg shadow-primary/20"
+              :disabled="isSubmitting"
+            >
+              <span
+                v-if="isSubmitting"
+                class="loading loading-spinner loading-sm"
+              ></span>
               Save Updates
             </button>
           </div>
         </form>
       </div>
-
     </div>
 
     <!-- Sidebar Component -->
