@@ -148,11 +148,7 @@ const prevPage = () => {
       </header>
 
       <!-- Main Content Area -->
-      <div
-        class="bg-base-100 backdrop-blur-xl shadow-2xl border border-base-content/5 rounded-[2.5rem] overflow-hidden flex flex-col"
-        data-aos="fade-right"
-        data-aos-delay="200"
-      >
+      <div class="bg-base-100 backdrop-blur-xl shadow-2xl border border-base-content/5 rounded-[2.5rem] overflow-hidden flex flex-col" data-aos="fade-right" data-aos-delay="200">
         <div v-if="store.loadingList" class="p-10 flex justify-center">
           <span class="loading loading-spinner text-primary loading-lg"></span>
         </div>
@@ -221,13 +217,13 @@ const prevPage = () => {
                 </td>
                 <td class="pr-12 py-10 text-right">
                   <div class="flex justify-end items-center gap-3">
-                    <button
-                      @click="() => openEditForm(teacher.id || 0)"
-                      class="btn btn-ghost btn-sm btn-circle text-base-content opacity-40 hover:opacity-100 transition-opacity"
+                    <router-link
+                      :to="`/teachers/edit/${teacher.id}`"
+                      class="btn btn-ghost btn-sm btn-circle text-base-content hover:bg-primary/10 hover:text-primary transition-all"
                       title="Edit Teacher"
                     >
                       <Icon icon="lucide:edit-3" class="w-4 h-4" />
-                    </button>
+                    </router-link>
                     <!-- Status Toggle Switch -->
                     <input 
                       type="checkbox" 
