@@ -18,7 +18,7 @@ export interface TeacherType {
 export const teacherService = {
   async getAll(params?: { page?: number; limit?: number; search?: string }): Promise<TeacherType[]> {
     const response = await apiClient.get('/teachers', { params });
-    return response.data;
+    return response.data.data || response.data;
   },
   async getById(id: number | string): Promise<TeacherType> {
     const response = await apiClient.get(`/teachers/${id}`);

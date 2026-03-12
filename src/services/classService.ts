@@ -17,7 +17,7 @@ export interface ClassType {
 export const classService = {
   async getAll(): Promise<ClassType[]> {
     const response = await apiClient.get('/classes');
-    return response.data;
+    return response.data.data || response.data;
   },
   async getById(id: number | string): Promise<ClassType> {
     const response = await apiClient.get(`/classes/${id}`);

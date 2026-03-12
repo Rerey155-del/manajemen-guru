@@ -214,10 +214,10 @@ const prevPage = () => {
                   <div class="flex justify-end items-center gap-3">
                     <router-link
                       :to="`/students/edit/${student.id}`"
-                      class="btn btn-ghost btn-sm btn-circle text-base-content hover:bg-primary/10 hover:text-primary transition-all"
+                      class="btn btn-ghost btn-sm btn-circle text-base-content hover:bg-primary/10 hover:text-primary transition-all relative z-10 pointer-events-auto"
                       title="Edit Student"
                     >
-                      <Icon icon="lucide:edit-3" class="w-4 h-4" />
+                      <Icon icon="lucide:edit-3" class="w-4 h-4 pointer-events-none" />
                     </router-link>
                     <!-- Status Toggle Switch -->
                     <input 

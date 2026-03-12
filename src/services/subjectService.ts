@@ -17,7 +17,7 @@ export interface SubjectType {
 export const subjectService = {
   async getAll(): Promise<SubjectType[]> {
     const response = await apiClient.get('/subjects');
-    return response.data;
+    return response.data.data || response.data;
   },
   async getById(id: number | string): Promise<SubjectType> {
     const response = await apiClient.get(`/subjects/${id}`);
