@@ -18,7 +18,6 @@ const router = useRouter();
 const route = useRoute();
 
 const isSubmitting = ref(false);
-const showSkeleton = ref(true);
 
 const form = ref({
   id: "" as string | number,
@@ -43,27 +42,23 @@ onMounted(async () => {
   });
 
   const id = route.params.id as string;
-
-  const fetchPromise = store.fetchDetail(id);
-
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  const detail = await fetchPromise;
-
-  showSkeleton.value = false;
-
-  if (!detail) {
+  try {
+    await store.fetchDetail(id);
+    if (store.detail) {
+      form.value = {
+        id: store.detail.id as string | number,
+        name: store.detail.name,
+        nis: store.detail.nis,
+        gender: store.detail.gender,
+        class_name: store.detail.class_name,
+      };
+    } else {
+      router.push("/students");
+    }
+  } catch (error) {
+    console.error("Failed to fetch student detail:", error);
     router.push("/students");
-    return;
   }
-
-  form.value = {
-    id: detail.id as string | number,
-    name: detail.name,
-    nis: detail.nis,
-    gender: detail.gender,
-    class_name: detail.class_name,
-  };
 });
 
 const goBack = () => {
@@ -143,7 +138,7 @@ const i18n = {
         data-aos-delay="150"
       >
         <!-- Skeleton -->
-        <div v-if="showSkeleton" class="space-y-6 animate-pulse">
+        <div v-if="store.loadingDetail" class="space-y-6 animate-pulse">
           <div class="space-y-2">
             <div class="h-3 w-24 bg-base-200 rounded"></div>
             <div class="h-12 bg-base-200 rounded-xl"></div>

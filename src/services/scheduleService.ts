@@ -14,7 +14,7 @@ export interface ScheduleType {
 export const scheduleService = {
   async getAll(): Promise<ScheduleType[]> {
     const response = await apiClient.get('/schedules');
-    return response.data;
+    return response.data.data || response.data;
   },
   async getById(id: number | string): Promise<ScheduleType> {
     const allItems = await this.getAll();

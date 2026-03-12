@@ -22,7 +22,7 @@ export const teacherService = {
   },
   async getById(id: number | string): Promise<TeacherType> {
     const response = await apiClient.get(`/teachers/${id}`);
-    return response.data;
+    return response.data.data || response.data;
   },
   async create(payload: Omit<TeacherType, 'id'>) {
     const response = await apiClient.post('/teachers', payload);

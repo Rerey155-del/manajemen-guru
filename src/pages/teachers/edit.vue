@@ -29,16 +29,21 @@ const searchDepartment = async (event: any) => {
 
 onMounted(async () => {
   const id = route.params.id as string;
-  const detail = await store.fetchDetail(id);
-  if (detail) {
-    form.value = { 
-      id: detail.id as string | number, 
-      name: detail.name, 
-      nip: detail.nip, 
-      email: detail.email, 
-      department: detail.department
-    };
-  } else {
+  try {
+    await store.fetchDetail(id);
+    if (store.detail) {
+      form.value = { 
+        id: store.detail.id as string | number, 
+        name: store.detail.name, 
+        nip: store.detail.nip, 
+        email: store.detail.email, 
+        department: store.detail.department
+      };
+    } else {
+      router.push('/teachers');
+    }
+  } catch (error) {
+    console.error("Failed to fetch teacher detail:", error);
     router.push('/teachers');
   }
 });

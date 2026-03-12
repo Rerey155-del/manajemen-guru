@@ -21,7 +21,7 @@ export const classService = {
   },
   async getById(id: number | string): Promise<ClassType> {
     const response = await apiClient.get(`/classes/${id}`);
-    return response.data;
+    return response.data.data || response.data;
   },
   async create(payload: Omit<ClassType, 'id'>) {
     const response = await apiClient.post('/classes', payload);

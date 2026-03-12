@@ -21,16 +21,21 @@ const form = ref({
 
 onMounted(async () => {
   const id = route.params.id as string;
-  const detail = await store.fetchDetail(id);
-  if (detail) {
-    form.value = {
-      id: detail.id as string | number,
-      class_designation: detail.class_designation,
-      room_id: detail.room_id,
-      utilization: detail.utilization,
-      status: detail.status || "Active",
-    };
-  } else {
+  try {
+    await store.fetchDetail(id);
+    if (store.detail) {
+      form.value = {
+        id: store.detail.id as string | number,
+        class_designation: store.detail.class_designation || "",
+        room_id: store.detail.room_id || "",
+        utilization: store.detail.utilization || "",
+        status: store.detail.status || "Active",
+      };
+    } else {
+      router.push('/classes');
+    }
+  } catch (error) {
+    console.error("Failed to fetch class detail:", error);
     router.push('/classes');
   }
 });

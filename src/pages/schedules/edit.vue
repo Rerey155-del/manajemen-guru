@@ -26,7 +26,6 @@ const router = useRouter();
 const route = useRoute();
 
 const isSubmitting = ref(false);
-const showSkeleton = ref(true);
 
 const form = ref({
   id: "" as string | number,
@@ -60,38 +59,33 @@ const searchSubject = async (event: any) => {
   );
 };
 
-/* Load Detail + Skeleton Delay */
+/* Load Detail */
 onMounted(async () => {
   const id = route.params.id as string;
+  try {
+    await store.fetchDetail(id);
+    if (store.detail) {
+      if (store.detail.period_duration) {
+        const times = store.detail.period_duration.split(" - ");
+        startTime.value = times[0] || "";
+        endTime.value = times[1] || "";
+      }
 
-  const fetchPromise = store.fetchDetail(id);
-
-  // Skeleton minimal 1 detik
-  await new Promise((resolve) => setTimeout(resolve, 3000));
-
-  const detail = await fetchPromise;
-
-  showSkeleton.value = false;
-
-  if (!detail) {
+      form.value = {
+        id: store.detail.id as string | number,
+        class_name: store.detail.class_name ? { name: store.detail.class_name } : "",
+        day: store.detail.day,
+        period_duration: store.detail.period_duration,
+        instructor: store.detail.instructor ? { name: store.detail.instructor } : "",
+        subject: store.detail.subject ? { name: store.detail.subject } : "",
+      };
+    } else {
+      router.push("/schedules");
+    }
+  } catch (error) {
+    console.error("Failed to fetch schedule detail:", error);
     router.push("/schedules");
-    return;
   }
-
-  if (detail.period_duration) {
-    const times = detail.period_duration.split(" - ");
-    startTime.value = times[0] || "";
-    endTime.value = times[1] || "";
-  }
-
-  form.value = {
-    id: detail.id as string | number,
-    class_name: detail.class_name ? { name: detail.class_name } : "",
-    day: detail.day,
-    period_duration: detail.period_duration,
-    instructor: detail.instructor ? { name: detail.instructor } : "",
-    subject: detail.subject ? { name: detail.subject } : "",
-  };
 });
 
 /* Navigation */
@@ -184,7 +178,7 @@ const i18n = {
         data-aos="fade-up"
       >
         <!-- Skeleton Loader -->
-        <div v-if="showSkeleton" class="space-y-6 animate-pulse">
+        <div v-if="store.loadingDetail" class="space-y-6 animate-pulse">
           <!-- Class -->
           <div class="space-y-2">
             <div class="h-3 w-32 bg-base-200 rounded"></div>

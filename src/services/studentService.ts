@@ -21,7 +21,7 @@ export const studentService = {
   },
   async getById(id: number | string): Promise<StudentType> {
     const response = await apiClient.get(`/students/${id}`);
-    const s = response.data;
+    const s = response.data.data || response.data;
     return {
       ...s,
       class_name: s.class_name || '-',
