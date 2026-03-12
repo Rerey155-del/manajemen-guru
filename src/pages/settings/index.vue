@@ -1,23 +1,20 @@
 <script setup lang="ts">
+import { ref, computed } from "vue";
+import { Icon } from "@iconify/vue";
 import Sidebar from "@/components/Sidebar.vue";
 import { useSettings } from "@/composables/useSettings";
 import { useUsers } from "@/composables/useUsers";
-import { ref, computed } from "vue";
-import { Icon } from "@iconify/vue";
+import { useDashboardStore } from "@/stores/useDashboardStore";
+
+const dashboardStore = useDashboardStore();
 
 const { profile, preferences, security, updateProfile, changePassword } =
   useSettings();
 const { users, updateUser } = useUsers();
 
-/* Language State */
-const locale = ref("en");
-
-const toggleLanguage = () => {
-  locale.value = locale.value === "en" ? "id" : "en";
-};
 
 const i18n = computed(() => {
-  const isId = locale.value === "id";
+  const isId = dashboardStore.locale === "id";
 
   return {
     brand: "SCHOOL",
@@ -120,7 +117,7 @@ const handleUserUpdate = async () => {
         <div class="flex items-center gap-2 mt-4">
           <span
             class="text-xs font-bold"
-            :class="locale === 'id' ? 'text-primary' : 'opacity-40'"
+            :class="dashboardStore.locale === 'id' ? 'text-primary' : 'opacity-40'"
           >
             ID
           </span>
@@ -128,13 +125,13 @@ const handleUserUpdate = async () => {
           <input
             type="checkbox"
             class="toggle toggle-primary toggle-sm"
-            :checked="locale === 'en'"
-            @change="toggleLanguage"
+            :checked="dashboardStore.locale === 'en'"
+            @change="dashboardStore.toggleLocale()"
           />
 
           <span
             class="text-xs font-bold"
-            :class="locale === 'en' ? 'text-primary' : 'opacity-40'"
+            :class="dashboardStore.locale === 'en' ? 'text-primary' : 'opacity-40'"
           >
             EN
           </span>

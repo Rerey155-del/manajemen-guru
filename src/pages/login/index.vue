@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 import { Icon } from "@iconify/vue";
+import { useDashboardStore } from "@/stores/useDashboardStore";
+
+const dashboardStore = useDashboardStore();
 
 const router = useRouter();
 const { login } = useAuth();
@@ -12,32 +15,35 @@ const password = ref("");
 const isLoading = ref(false);
 const error = ref("");
 
-const i18n = {
-  brand: "Manajement Sekolah",
-  version: "V3",    
-  subtitle: "Professional Management Suite",
-  errors: {
-    emptyFields: "Please enter both username and password.",
-    invalid: "Invalid credentials. Please try again."
-  },
-  labels: {
-    username: "Username",
-    password: "Password",
-    remember: "Remember me",
-    forgot: "Forgot Password?",
-    authorize: "Authorize Access",
-    copyright: "2024 SchoolV3 Integrated Systems."
-  },
-  placeholders: {
-    username: "Enter your username",
-    password: "••••••••"
-  },
-  rights: "All rights reserved."
-};
+const i18n = computed(() => {
+  const isId = dashboardStore.locale === 'id';
+  return {
+    brand: isId ? "Manajemen Sekolah" : "School Management",
+    version: "V3",    
+    subtitle: isId ? "Paket Manajemen Profesional" : "Professional Management Suite",
+    errors: {
+      emptyFields: isId ? "Silakan masukkan username dan password." : "Please enter both username and password.",
+      invalid: isId ? "Kredensial tidak valid. Silakan coba lagi." : "Invalid credentials. Please try again."
+    },
+    labels: {
+      username: "Username",
+      password: "Password",
+      remember: isId ? "Ingat saya" : "Remember me",
+      forgot: isId ? "Lupa Kata Sandi?" : "Forgot Password?",
+      authorize: isId ? "Otorisasi Akses" : "Authorize Access",
+      copyright: isId ? "2024 Sistem Terintegrasi SchoolV3." : "2024 SchoolV3 Integrated Systems."
+    },
+    placeholders: {
+      username: isId ? "Masukkan username Anda" : "Enter your username",
+      password: "••••••••"
+    },
+    rights: isId ? "Hak cipta dilindungi." : "All rights reserved."
+  };
+});
 
 const handleLogin = async () => {
   if (!username.value || !password.value) {
-    error.value = i18n.errors.emptyFields;
+    error.value = i18n.value.errors.emptyFields;
     return;
   }
 
@@ -50,7 +56,7 @@ const handleLogin = async () => {
       router.push("/");
     }
   } catch (err: any) {
-    error.value = i18n.errors.invalid;
+    error.value = i18n.value.errors.invalid;
   } finally {
     isLoading.value = false;
   }
@@ -84,6 +90,23 @@ const handleLogin = async () => {
 
       <!-- Login Form -->
       <form @submit.prevent="handleLogin" class="space-y-6">
+        <div class="flex justify-center mb-6">
+          <div class="flex items-center gap-2 border border-base-content/5 p-1 rounded-xl bg-base-200/50">
+            <button 
+              type="button"
+              @click="dashboardStore.locale = 'id'"
+              class="px-3 py-1 rounded-lg text-xs font-black transition-all"
+              :class="dashboardStore.locale === 'id' ? 'bg-primary text-primary-content shadow-lg' : 'text-base-content/40 hover:text-base-content'"
+            >ID</button>
+            <button 
+              type="button"
+              @click="dashboardStore.locale = 'en'"
+              class="px-3 py-1 rounded-lg text-xs font-black transition-all"
+              :class="dashboardStore.locale === 'en' ? 'bg-primary text-primary-content shadow-lg' : 'text-base-content/40 hover:text-base-content'"
+            >EN</button>
+          </div>
+        </div>
+
         <div v-if="error" class="alert alert-error bg-error/10 border-error/20 text-error rounded-xl font-bold py-3 flex gap-2">
           <Icon icon="lucide:alert-circle" />
           <span>{{ error }}</span>
@@ -100,7 +123,7 @@ const handleLogin = async () => {
               v-model="username"
               type="text"
               :placeholder="i18n.placeholders.username"
-              class="input bg-base-200/50 border-base-content/5 rounded-2xl pl-12 w-full focus:border-primary/50 text-base-content font-medium h-14"
+              class="input bg-base-200/50 border-base-content/5 rounded-2xl pl-12 w-full focus:border-primary/50 text-base-content font-medium h-14 focus:outline-none focus:ring-4 focus:ring-primary/10"
               required
             />
           </div>
@@ -117,7 +140,7 @@ const handleLogin = async () => {
               v-model="password"
               type="password"
               :placeholder="i18n.placeholders.password"
-              class="input bg-base-200/50 border-base-content/5 rounded-2xl pl-12 w-full focus:border-primary/50 text-base-content font-medium h-14"
+              class="input bg-base-200/50 border-base-content/5 rounded-2xl pl-12 w-full focus:border-primary/50 text-base-content font-medium h-14 focus:outline-none focus:ring-4 focus:ring-primary/10"
               required
             />
           </div>
@@ -151,11 +174,6 @@ const handleLogin = async () => {
 </template>
 
 <style scoped>
-.input:focus {
-  outline: none;
-  @apply ring-4 ring-primary/10;
-}
-
 @keyframes pulse {
   0%, 100% { opacity: 0.1; transform: scale(1); }
   50% { opacity: 0.2; transform: scale(1.1); }
