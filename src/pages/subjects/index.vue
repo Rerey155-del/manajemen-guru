@@ -47,6 +47,7 @@ const i18n = {
     back: "Back to List"
   },
   table: {
+    id: "ID",
     name: "Subject Name",
     code: "Academic Code",
     metadata: "Metadata",
@@ -150,7 +151,8 @@ const prevPage = () => {
           <table class="table table-lg w-full">
             <thead>
               <tr class="text-base-content/30 font-bold uppercase tracking-widest text-[10px] border-b border-base-content/5">
-                <th class="pl-12 py-8">{{ i18n.table.name }}</th>
+                <th class="pl-12 py-8 w-16 text-center">{{ i18n.table.id }}</th>
+                <th class="py-8 font-bold text-primary">{{ i18n.table.name }}</th>
                 <th class="py-8">{{ i18n.table.code }}</th>
               
                 <th class="pr-12 py-8 text-right">{{ i18n.table.actions }}</th>
@@ -162,7 +164,10 @@ const prevPage = () => {
                 :key="sub.id"
                 class="border-b border-base-content/5 last:border-0 hover:bg-base-content/[0.02] transition-colors"
               >
-                <td class="pl-12 py-10 font-bold text-lg text-primary">
+                <td class="pl-12 py-10 font-bold text-base-content/20 text-center">
+                  #{{ sub.id }}
+                </td>
+                <td class="py-10 font-bold text-lg text-primary">
                   {{ sub.subject_name }}
                 </td>
                 <td class="py-10 font-bold text-lg text-base-content/40 font-mono tracking-tighter">
@@ -181,7 +186,7 @@ const prevPage = () => {
                 </td>
               </tr>
               <tr v-if="paginatedSubjects.length === 0">
-                <td colspan="5" class="py-20 text-center text-base-content/20 font-bold italic">
+                <td colspan="4" class="py-20 text-center text-base-content/20 font-bold italic">
                   {{ i18n.table.noResults }} "{{ searchQuery }}"
                 </td>
               </tr>
