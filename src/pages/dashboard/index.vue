@@ -81,7 +81,7 @@ const i18n = computed(() => {
 
       <!-- Header Section -->
       <header
-        class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10"
+        class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 relative z-[50]"
         data-aos="fade-down"
       >
         <div>
