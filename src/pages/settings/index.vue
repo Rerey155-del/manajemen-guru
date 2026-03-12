@@ -5,7 +5,8 @@ import { useUsers } from "@/composables/useUsers";
 import { ref, computed } from "vue";
 import { Icon } from "@iconify/vue";
 
-const { profile, preferences, security, updateProfile, changePassword } = useSettings();
+const { profile, preferences, security, updateProfile, changePassword } =
+  useSettings();
 const { users, updateUser } = useUsers();
 
 /* Language State */
@@ -26,7 +27,7 @@ const i18n = computed(() => {
       title: isId ? "Pengaturan" : "Settings",
       subtitle: isId
         ? "Kelola pengaturan akun dan preferensi aplikasi."
-        : "Manage your account settings and application preferences."
+        : "Manage your account settings and application preferences.",
     },
 
     profile: {
@@ -35,7 +36,7 @@ const i18n = computed(() => {
       username: "Username",
       email: "Email",
       password: isId ? "Kata Sandi" : "Password",
-      update: isId ? "Perbarui Profil" : "Update Profile"
+      update: isId ? "Perbarui Profil" : "Update Profile",
     },
 
     preferences: {
@@ -43,7 +44,7 @@ const i18n = computed(() => {
       darkMode: isId ? "Mode Gelap" : "Dark Mode",
       darkModeDesc: isId
         ? "Aktifkan tema gelap untuk dashboard."
-        : "Turn on dark theme for the dashboard."
+        : "Turn on dark theme for the dashboard.",
     },
 
     usersTable: {
@@ -51,11 +52,12 @@ const i18n = computed(() => {
       fullName: isId ? "Nama Lengkap" : "Full Name",
       username: "Username",
       email: "Email",
+      password : "Password",
       role: isId ? "Peran" : "Role",
       status: isId ? "Status" : "Status",
       lastLogin: isId ? "Login Terakhir" : "Last Login",
-      actions: isId ? "Aksi" : "Actions"
-    }
+      actions: isId ? "Aksi" : "Actions",
+    },
   };
 });
 
@@ -69,7 +71,8 @@ const editUserForm = ref({
   email: "",
   role: "",
   status: "",
-  last_login: ""
+  last_login: "",
+  password: "",
 });
 
 const openUserModal = (user: any) => {
@@ -121,14 +124,14 @@ const handleUserUpdate = async () => {
           >
             ID
           </span>
-  
+
           <input
             type="checkbox"
             class="toggle toggle-primary toggle-sm"
             :checked="locale === 'en'"
             @change="toggleLanguage"
           />
-  
+
           <span
             class="text-xs font-bold"
             :class="locale === 'en' ? 'text-primary' : 'opacity-40'"
@@ -192,7 +195,6 @@ const handleUserUpdate = async () => {
                   class="input bg-base-200 border-base-content/5 rounded-xl h-14 font-bold text-base-content/90 focus:border-primary/50"
                 />
               </div>
-
               <div class="form-control w-full">
                 <label class="label mb-1">
                   <span
@@ -204,7 +206,6 @@ const handleUserUpdate = async () => {
                   type="password"
                   v-model="profile.password"
                   class="input bg-base-200 border-base-content/5 rounded-xl h-14 font-bold text-base-content/90 focus:border-primary/50"
-                  placeholder="Leave blank to keep current password"
                 />
               </div>
             </div>
