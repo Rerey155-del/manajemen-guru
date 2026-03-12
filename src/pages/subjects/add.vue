@@ -2,38 +2,72 @@
 import Sidebar from "@/components/Sidebar.vue";
 import { Icon } from "@iconify/vue";
 import { useSubjectStore } from "@/stores/useSubjectStore";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 const store = useSubjectStore();
 const router = useRouter();
 
 const isSubmitting = ref(false);
+const localError = ref<string | null>(null);
 
 const form = ref({
   subject_name: "",
   academic_code: "",
   metadata: [] as string[],
-  
 });
 const metadataInput = ref("");
+
+onMounted(async () => {
+  if (store.items.length === 0) {
+    await store.fetchList();
+  }
+});
 
 const goBack = () => {
   router.push('/subjects');
 };
 
 const handleSubmit = async () => {
+  localError.value = null;
+  
+  // Validation
+  if (!form.value.subject_name.trim()) {
+    localError.value = "Subject name is required";
+    return;
+  }
+  if (!form.value.academic_code.trim()) {
+    localError.value = "Academic code is required";
+    return;
+  }
+
   try {
     isSubmitting.value = true;
+    
+    // Ensure items are fetched for uniqueness check
+    if (store.items.length === 0) {
+      await store.fetchList();
+    }
+    
+    // Unique check
+    const existing = store.items.find(i => i.academic_code === form.value.academic_code.trim());
+    if (existing) {
+      localError.value = "Academic code already exists";
+      isSubmitting.value = false;
+      return;
+    }
+
     const finalPayload = {
-      ...form.value,
+      subject_name: form.value.subject_name.trim(),
+      academic_code: form.value.academic_code.trim(),
       metadata: metadataInput.value.split(",").map(t => t.trim()).filter(Boolean)
     };
 
     await store.createItem(finalPayload);
     router.push('/subjects');
   } catch (error: any) {
-    alert(error.message || 'An error occurred');
+    localError.value = error.response?.data?.message || error.message || 'Failed to save subject';
+    console.error("Add Subject Error:", error);
   } finally {
     isSubmitting.value = false;
   }
@@ -76,6 +110,12 @@ const i18n = {
 
       <div class="bg-base-100 backdrop-blur-xl shadow-2xl border border-base-content/5 rounded-[2.5rem] p-8 max-w-3xl" data-aos="fade-up">
         <form @submit.prevent="handleSubmit" class="flex flex-col gap-5">
+          <!-- Error Message Display -->
+          <div v-if="localError" class="alert alert-error rounded-xl shadow-sm py-3 mb-2 animate-in fade-in slide-in-from-top-4">
+            <Icon icon="lucide:alert-circle" />
+            <span class="text-sm font-semibold italic">{{ localError }}</span>
+          </div>
+
           <div class="form-control">
             <label class="label"><span class="label-text font-bold">Subject Name</span></label>
             <input v-model="form.subject_name" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="Mathematics" />

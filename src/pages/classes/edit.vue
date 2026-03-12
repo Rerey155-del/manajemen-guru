@@ -10,6 +10,7 @@ const router = useRouter();
 const route = useRoute();
 
 const isSubmitting = ref(false);
+const localError = ref<string | null>(null);
 
 const form = ref({
   id: "" as string | number,
@@ -45,13 +46,39 @@ const goBack = () => {
 };
 
 const handleSubmit = async () => {
+  localError.value = null;
+
+  // Validation
+  if (!form.value.class_designation.trim()) {
+    localError.value = "Class designation is required";
+    return;
+  }
+  if (!form.value.room_id.trim()) {
+    localError.value = "Room ID is required";
+    return;
+  }
+  if (!form.value.utilization.trim()) {
+    localError.value = "Utilization is required";
+    return;
+  }
+
   try {
     isSubmitting.value = true;
-    const { id, ...putPayload } = form.value;
-    await store.updateItem(id, putPayload);
+    
+    // Payload optimization
+    const finalPayload = {
+      class_designation: form.value.class_designation.trim(),
+      room_id: form.value.room_id.trim(),
+      utilization: form.value.utilization.trim(),
+      status: form.value.status
+    };
+
+    const idNum = Number(form.value.id);
+    await store.updateItem(idNum, finalPayload);
     router.push('/classes');
   } catch (error: any) {
-    alert(error.message || "An error occurred");
+    localError.value = error.response?.data?.message || error.message || "Failed to update classroom";
+    console.error("Edit Class Error:", error);
   } finally {
     isSubmitting.value = false;
   }
@@ -104,6 +131,12 @@ const i18n = {
         </div>
 
         <form v-else @submit.prevent="handleSubmit" class="flex flex-col gap-5">
+          <!-- Error Message Display -->
+          <div v-if="localError" class="alert alert-error rounded-xl shadow-sm py-3 mb-2 animate-in fade-in slide-in-from-top-4">
+            <Icon icon="lucide:alert-circle" />
+            <span class="text-sm font-semibold italic">{{ localError }}</span>
+          </div>
+
           <div class="form-control">
             <label class="label"><span class="label-text font-bold">Class Designation</span></label>
             <input v-model="form.class_designation" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="Grade 10A" />

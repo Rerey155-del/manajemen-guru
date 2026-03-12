@@ -10,6 +10,7 @@ const router = useRouter();
 const route = useRoute();
 
 const isSubmitting = ref(false);
+const localError = ref<string | null>(null);
 
 const form = ref({
   id: '' as string | number,
@@ -21,7 +22,12 @@ const metadataInput = ref("");
 onMounted(async () => {
   const id = route.params.id as string;
   try {
-    await store.fetchDetail(id);
+    const fetchPromises: Promise<any>[] = [store.fetchDetail(id)];
+    if (store.items.length === 0) {
+      fetchPromises.push(store.fetchList());
+    }
+    await Promise.all(fetchPromises);
+
     if (store.detail) {
       form.value = { 
         id: store.detail.id as string | number, 
@@ -45,18 +51,44 @@ const goBack = () => {
 };
 
 const handleSubmit = async () => {
+  localError.value = null;
+
+  // Validation
+  if (!form.value.subject_name.trim()) {
+    localError.value = "Subject name is required";
+    return;
+  }
+  if (!form.value.academic_code.trim()) {
+    localError.value = "Academic code is required";
+    return;
+  }
+
   try {
     isSubmitting.value = true;
+    
+    // Unique check (excluding current item)
+    const existing = store.items.find(i => 
+      i.academic_code === form.value.academic_code.trim() && 
+      String(i.id) !== String(form.value.id)
+    );
+    if (existing) {
+      localError.value = "Academic code already exists";
+      isSubmitting.value = false;
+      return;
+    }
+
     const finalPayload = {
-      ...form.value,
+      subject_name: form.value.subject_name.trim(),
+      academic_code: form.value.academic_code.trim(),
       metadata: metadataInput.value.split(",").map(t => t.trim()).filter(Boolean)
     };
 
-    const { id, ...putPayload } = finalPayload;
-    await store.updateItem(id, putPayload);
+    const idNum = Number(form.value.id);
+    await store.updateItem(idNum, finalPayload);
     router.push('/subjects');
   } catch (error: any) {
-    alert(error.message || 'An error occurred');
+    localError.value = error.response?.data?.message || error.message || 'Failed to update subject';
+    console.error("Edit Subject Error:", error);
   } finally {
     isSubmitting.value = false;
   }
@@ -109,6 +141,12 @@ const i18n = {
         </div>
         
         <form v-else @submit.prevent="handleSubmit" class="flex flex-col gap-5">
+          <!-- Error Message Display -->
+          <div v-if="localError" class="alert alert-error rounded-xl shadow-sm py-3 mb-2 animate-in fade-in slide-in-from-top-4">
+            <Icon icon="lucide:alert-circle" />
+            <span class="text-sm font-semibold italic">{{ localError }}</span>
+          </div>
+
           <div class="form-control">
             <label class="label"><span class="label-text font-bold">Subject Name</span></label>
             <input v-model="form.subject_name" type="text" class="input input-bordered focus:border-primary rounded-xl" required placeholder="Mathematics" />
