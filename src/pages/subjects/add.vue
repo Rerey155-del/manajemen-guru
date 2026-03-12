@@ -14,9 +14,7 @@ const localError = ref<string | null>(null);
 const form = ref({
   subject_name: "",
   academic_code: "",
-  metadata: [] as string[],
 });
-const metadataInput = ref("");
 
 onMounted(async () => {
   if (store.items.length === 0) {
@@ -59,8 +57,7 @@ const handleSubmit = async () => {
 
     const finalPayload = {
       subject_name: form.value.subject_name.trim(),
-      academic_code: form.value.academic_code.trim(),
-      metadata: metadataInput.value.split(",").map(t => t.trim()).filter(Boolean)
+      academic_code: form.value.academic_code.trim()
     };
 
     await store.createItem(finalPayload);

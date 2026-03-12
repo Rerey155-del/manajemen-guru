@@ -17,7 +17,6 @@ const form = ref({
   subject_name: "",
   academic_code: "",
 });
-const metadataInput = ref("");
 
 onMounted(async () => {
   const id = route.params.id as string;
@@ -34,9 +33,6 @@ onMounted(async () => {
         subject_name: store.detail.subject_name || "", 
         academic_code: store.detail.academic_code || "", 
       };
-      metadataInput.value = Array.isArray(store.detail.metadata) 
-        ? store.detail.metadata.join(", ") 
-        : (store.detail.metadata as string) || "";
     } else {
       router.push('/subjects');
     }
@@ -79,8 +75,7 @@ const handleSubmit = async () => {
 
     const finalPayload = {
       subject_name: form.value.subject_name.trim(),
-      academic_code: form.value.academic_code.trim(),
-      metadata: metadataInput.value.split(",").map(t => t.trim()).filter(Boolean)
+      academic_code: form.value.academic_code.trim()
     };
 
     const idNum = Number(form.value.id);

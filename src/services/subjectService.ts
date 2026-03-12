@@ -42,7 +42,7 @@ export const subjectService = {
   async autocompleteSubjects(query: string): Promise<SubjectAutocompleteOption[]> {
     const data = await this.getAll();
     return data
-      .filter(s => s.subject_name.toLowerCase().includes(query.toLowerCase()))
+      .filter(s => (s.subject_name || '').toLowerCase().includes(query.toLowerCase()))
       .map(s => ({ id: s.id!, name: s.subject_name }));
   }
 };
