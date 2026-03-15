@@ -109,6 +109,18 @@ const routes = [
         name : 'schedules-edit',
         component: () => import('@/pages/schedules/edit.vue'),
         meta: { requiresAuth: true, title: 'Edit Schedule' }
+    },
+    {
+        path: '/announcements',
+        name : 'announcements',
+        component: () => import('@/pages/announcements/index.vue'),
+        meta: { requiresAuth: true, title: 'Broadcast Hub' }
+    },
+    {
+        path: '/announcements/add',
+        name : 'announcements-add',
+        component: () => import('@/pages/announcements/add.vue'),
+        meta: { requiresAuth: true, title: 'New Broadcast' }
     }
 ]
 

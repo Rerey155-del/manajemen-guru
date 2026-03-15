@@ -28,6 +28,7 @@ const i18n = computed(() => {
       subjects: isId ? "Mata Pelajaran" : "Subjects",
       classes: isId ? "Kelas" : "Classes",
       schedules: isId ? "Jadwal" : "Schedules",
+      announcements: isId ? "Pengumuman" : "Announcements",
       settings: isId ? "Pengaturan" : "Settings",
     },
   };
@@ -44,6 +45,7 @@ const menuItems = computed(() => [
   { name: i18n.value.items.subjects, path: "/subjects", icon: "lucide:book-open" },
   { name: i18n.value.items.classes, path: "/classes", icon: "lucide:school" },
   { name: i18n.value.items.schedules, path: "/schedules", icon: "lucide:calendar" },
+  { name: i18n.value.items.announcements, path: "/announcements", icon: "lucide:megaphone" },
 ]);
 
 const isActive = (path: string) => {
