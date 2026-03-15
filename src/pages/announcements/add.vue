@@ -28,6 +28,7 @@ const handleSubmit = async () => {
 
 <template>
   <div class="drawer lg:drawer-open bg-base-200 min-h-screen">
+    <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content p-6 lg:p-10 flex justify-center items-start">
       <div
         class="w-full max-w-2xl bg-base-100 p-10 rounded-[2.5rem] shadow-2xl border border-base-content/5 mt-10"

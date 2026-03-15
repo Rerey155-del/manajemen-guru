@@ -13,6 +13,7 @@ onMounted(() => store.fetchList());
 
 <template>
   <div class="drawer lg:drawer-open bg-base-200 min-h-screen">
+    <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
     <div class="drawer-content p-6 lg:p-10">
       <header class="flex justify-between items-center mb-10">
         <div>
